@@ -1,36 +1,202 @@
 /**
- * ASAYESH HOTEL - 3D Engine & Interactive Experiences
- * Built with Three.js (WebGL) and Spatial Parallax Physics
+ * ASAYESH HOTEL - Comprehensive 3D Spatial Frontend Engine
+ * Three.js WebGL + 3D Cylindrical Carousel + Parallax Physics
  * Bachelor's Degree Capstone Project
  */
 
 // -------------------------------------------------------------
-// 1. 3D HERO ARCHITECTURAL HOTEL SCENE (Three.js)
+// 1. GLOBAL 3D SPATIAL BACKGROUND (Runs across the entire site)
 // -------------------------------------------------------------
-function initHero3D() {
+function initGlobal3DBackground() {
+    const canvas = document.getElementById('global-3d-canvas');
+    if (!canvas || typeof THREE === 'undefined') return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 25;
+
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Ambient & Directional Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    const dirLight1 = new THREE.DirectionalLight(0x38bdf8, 1.2);
+    dirLight1.position.set(10, 20, 15);
+    scene.add(dirLight1);
+
+    const dirLight2 = new THREE.DirectionalLight(0xf59e0b, 1.0);
+    dirLight2.position.set(-10, -10, 10);
+    scene.add(dirLight2);
+
+    // Floating 3D Geometric Luxury Polyhedra (Diamonds, Torus, Crystals)
+    const objectsGroup = new THREE.Group();
+    scene.add(objectsGroup);
+
+    const geometries = [
+        new THREE.OctahedronGeometry(1.2, 0),
+        new THREE.IcosahedronGeometry(1.0, 0),
+        new THREE.TorusGeometry(1.4, 0.25, 16, 50),
+        new THREE.TetrahedronGeometry(1.2, 0),
+        new THREE.DodecahedronGeometry(1.1, 0)
+    ];
+
+    const materials = [
+        new THREE.MeshPhysicalMaterial({
+            color: 0x38bdf8,
+            roughness: 0.1,
+            metalness: 0.2,
+            transmission: 0.85,
+            opacity: 0.7,
+            transparent: true,
+            ior: 1.5
+        }),
+        new THREE.MeshPhysicalMaterial({
+            color: 0xf59e0b,
+            roughness: 0.2,
+            metalness: 0.6,
+            transmission: 0.6,
+            opacity: 0.75,
+            transparent: true
+        }),
+        new THREE.MeshStandardMaterial({
+            color: 0x6366f1,
+            roughness: 0.3,
+            metalness: 0.8
+        })
+    ];
+
+    const floatingObjects = [];
+    const count = 18;
+
+    for (let i = 0; i < count; i++) {
+        const geo = geometries[i % geometries.length];
+        const mat = materials[i % materials.length];
+        const mesh = new THREE.Mesh(geo, mat);
+
+        mesh.position.set(
+            (Math.random() - 0.5) * 45,
+            (Math.random() - 0.5) * 35,
+            (Math.random() - 0.5) * 20 - 5
+        );
+
+        const s = 0.5 + Math.random() * 0.7;
+        mesh.scale.set(s, s, s);
+
+        objectsGroup.add(mesh);
+        floatingObjects.push({
+            mesh: mesh,
+            rotX: (Math.random() - 0.5) * 0.015,
+            rotY: (Math.random() - 0.5) * 0.015,
+            rotZ: (Math.random() - 0.5) * 0.015,
+            floatY: mesh.position.y,
+            speed: 0.001 + Math.random() * 0.002,
+            offset: Math.random() * Math.PI * 2
+        });
+    }
+
+    // 3D Luminous Particle Constellation Field
+    const particleGeo = new THREE.BufferGeometry();
+    const particleCount = 200;
+    const posArray = new Float32Array(particleCount * 3);
+
+    for (let i = 0; i < particleCount * 3; i += 3) {
+        posArray[i] = (Math.random() - 0.5) * 60;
+        posArray[i + 1] = (Math.random() - 0.5) * 50;
+        posArray[i + 2] = (Math.random() - 0.5) * 30;
+    }
+
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+    const particleMat = new THREE.PointsMaterial({
+        size: 0.22,
+        color: 0x93c5fd,
+        transparent: true,
+        opacity: 0.65
+    });
+
+    const particleMesh = new THREE.Points(particleGeo, particleMat);
+    scene.add(particleMesh);
+
+    // Mouse and Scroll Parallax
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let scrollY = 0;
+    let targetScrollY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+        mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+    });
+
+    window.addEventListener('scroll', () => {
+        scrollY = window.scrollY;
+    });
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Animation Loop
+    let clock = new THREE.Clock();
+
+    function animate() {
+        requestAnimationFrame(animate);
+        const elapsed = clock.getElapsedTime();
+
+        targetX += (mouseX * 4 - targetX) * 0.04;
+        targetY += (mouseY * 3 - targetY) * 0.04;
+        targetScrollY += (scrollY * 0.01 - targetScrollY) * 0.05;
+
+        camera.position.x = targetX;
+        camera.position.y = targetY - targetScrollY;
+        camera.lookAt(0, -targetScrollY, 0);
+
+        // Rotate objects & float
+        floatingObjects.forEach((item) => {
+            item.mesh.rotation.x += item.rotX;
+            item.mesh.rotation.y += item.rotY;
+            item.mesh.rotation.z += item.rotZ;
+            item.mesh.position.y = item.floatY + Math.sin(elapsed * 1.5 + item.offset) * 0.6;
+        });
+
+        particleMesh.rotation.y = elapsed * 0.02;
+        particleMesh.rotation.x = elapsed * 0.01;
+
+        renderer.render(scene, camera);
+    }
+    animate();
+}
+
+// -------------------------------------------------------------
+// 2. HERO 3D ARCHITECTURAL RESORT SCENE (Hero Centerpiece)
+// -------------------------------------------------------------
+function initHero3DScene() {
     const container = document.getElementById('hero-3d-container');
     if (!container || typeof THREE === 'undefined') return;
 
-    const width = container.clientWidth || 500;
+    const width = container.clientWidth || 550;
     const height = container.clientHeight || 450;
 
-    // Scene, Camera, Renderer
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(12, 10, 16);
+    camera.position.set(13, 11, 16);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMappingExposure = 1.15;
 
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // Controls
     let controls = null;
     if (typeof THREE.OrbitControls !== 'undefined') {
         controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -38,189 +204,161 @@ function initHero3D() {
         controls.dampingFactor = 0.05;
         controls.enableZoom = false;
         controls.autoRotate = true;
-        controls.autoRotateSpeed = 0.8;
+        controls.autoRotateSpeed = 1.0;
         controls.maxPolarAngle = Math.PI / 2.1;
-        controls.minPolarAngle = Math.PI / 4;
+        controls.minPolarAngle = Math.PI / 4.5;
     }
 
-    // Ambient and Directional Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
     scene.add(ambientLight);
 
-    const dirLight = new THREE.DirectionalLight(0xfef08a, 1.4);
-    dirLight.position.set(15, 25, 10);
-    dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 1024;
-    dirLight.shadow.mapSize.height = 1024;
-    scene.add(dirLight);
+    const sunLight = new THREE.DirectionalLight(0xfef08a, 1.6);
+    sunLight.position.set(14, 22, 12);
+    sunLight.castShadow = true;
+    scene.add(sunLight);
 
-    const pointLight1 = new THREE.PointLight(0x38bdf8, 2, 20);
-    pointLight1.position.set(-6, 8, 4);
-    scene.add(pointLight1);
+    const cyanGlow = new THREE.PointLight(0x38bdf8, 2.5, 25);
+    cyanGlow.position.set(-7, 8, 5);
+    scene.add(cyanGlow);
 
-    const pointLight2 = new THREE.PointLight(0xf59e0b, 2.5, 20);
-    pointLight2.position.set(5, 4, -4);
-    scene.add(pointLight2);
+    const amberGlow = new THREE.PointLight(0xf59e0b, 3, 25);
+    amberGlow.position.set(6, 4, -5);
+    scene.add(amberGlow);
 
-    // Group for Hotel Architecture
+    // Group for Hotel Complex
     const hotelGroup = new THREE.Group();
     scene.add(hotelGroup);
 
-    // Island / Podium Base
-    const baseGeo = new THREE.CylinderGeometry(8.5, 9.5, 0.8, 32);
+    // Island / Futuristic Podium
+    const baseGeo = new THREE.CylinderGeometry(8.5, 9.8, 0.9, 36);
     const baseMat = new THREE.MeshStandardMaterial({
-        color: 0x0f172a,
-        roughness: 0.3,
-        metalness: 0.4
+        color: 0x090d16,
+        roughness: 0.25,
+        metalness: 0.5
     });
     const baseMesh = new THREE.Mesh(baseGeo, baseMat);
-    baseMesh.position.y = -0.4;
+    baseMesh.position.y = -0.45;
     baseMesh.receiveShadow = true;
     hotelGroup.add(baseMesh);
 
-    // Glowing Podium Ring
-    const ringGeo = new THREE.TorusGeometry(8.6, 0.1, 16, 64);
+    // Glowing Cyan Rings
+    const ringGeo = new THREE.TorusGeometry(8.7, 0.09, 16, 64);
     const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
     const ringMesh = new THREE.Mesh(ringGeo, ringMat);
     ringMesh.rotation.x = Math.PI / 2;
-    ringMesh.position.y = 0.02;
+    ringMesh.position.y = 0.03;
     hotelGroup.add(ringMesh);
 
-    // Main Tower (Tower 1 - High Rise)
-    const tower1Geo = new THREE.BoxGeometry(3.6, 7.5, 3.6);
+    // Tower 1 (Grand High-Rise Hotel Tower)
+    const tower1Geo = new THREE.BoxGeometry(3.8, 8.0, 3.8);
     const tower1Mat = new THREE.MeshStandardMaterial({
         color: 0x1e293b,
-        roughness: 0.2,
-        metalness: 0.6
+        roughness: 0.15,
+        metalness: 0.65
     });
     const tower1 = new THREE.Mesh(tower1Geo, tower1Mat);
-    tower1.position.set(-1.2, 3.75, 0);
+    tower1.position.set(-1.4, 4.0, 0);
     tower1.castShadow = true;
-    tower1.receiveShadow = true;
     hotelGroup.add(tower1);
 
-    // Secondary Luxury Wing (Tower 2 - Modern Terraced)
-    const tower2Geo = new THREE.BoxGeometry(4.2, 4.5, 3);
+    // Tower 2 (Terraced Luxury Wing)
+    const tower2Geo = new THREE.BoxGeometry(4.4, 4.8, 3.2);
     const tower2Mat = new THREE.MeshStandardMaterial({
         color: 0x334155,
-        roughness: 0.3,
-        metalness: 0.5
+        roughness: 0.25,
+        metalness: 0.55
     });
     const tower2 = new THREE.Mesh(tower2Geo, tower2Mat);
-    tower2.position.set(2.2, 2.25, 0.8);
+    tower2.position.set(2.4, 2.4, 0.8);
     tower2.castShadow = true;
-    tower2.receiveShadow = true;
     hotelGroup.add(tower2);
 
-    // Glass Windows Grid (Glowing Gold & Cyan)
-    const windowMatWarm = new THREE.MeshBasicMaterial({ color: 0xfef08a });
-    const windowMatCool = new THREE.MeshBasicMaterial({ color: 0x67e8f9 });
+    // Glowing Golden & Sky-Blue Windows
+    const winWarm = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+    const winCool = new THREE.MeshBasicMaterial({ color: 0x7dd3fc });
 
-    for (let floor = 0; floor < 6; floor++) {
+    for (let floor = 0; floor < 7; floor++) {
         for (let col = 0; col < 3; col++) {
-            const winGeo = new THREE.PlaneGeometry(0.6, 0.5);
+            const winGeo = new THREE.PlaneGeometry(0.65, 0.55);
             const isWarm = (floor + col) % 2 === 0;
-            const winMesh = new THREE.Mesh(winGeo, isWarm ? windowMatWarm : windowMatCool);
-            winMesh.position.set(-2.4 + col * 1.2, 1.2 + floor * 1.0, 1.81);
-            hotelGroup.add(winMesh);
+            const winFront = new THREE.Mesh(winGeo, isWarm ? winWarm : winCool);
+            winFront.position.set(-2.6 + col * 1.25, 1.2 + floor * 1.0, 1.91);
+            hotelGroup.add(winFront);
 
-            // Back side windows
-            const winBack = winMesh.clone();
-            winBack.position.z = -1.81;
+            const winBack = winFront.clone();
+            winBack.position.z = -1.91;
             winBack.rotation.y = Math.PI;
             hotelGroup.add(winBack);
         }
     }
 
-    // Infinity Rooftop Pool on Tower 2
-    const poolGeo = new THREE.BoxGeometry(3.6, 0.2, 2.4);
+    // Rooftop Infinity Pool (Cyan Translucent Glass)
+    const poolGeo = new THREE.BoxGeometry(3.8, 0.25, 2.6);
     const poolMat = new THREE.MeshStandardMaterial({
         color: 0x06b6d4,
-        roughness: 0.1,
+        roughness: 0.05,
         metalness: 0.9,
         transparent: true,
-        opacity: 0.85
+        opacity: 0.9
     });
     const pool = new THREE.Mesh(poolGeo, poolMat);
-    pool.position.set(2.2, 4.55, 0.8);
+    pool.position.set(2.4, 4.9, 0.8);
     hotelGroup.add(pool);
 
-    // Glowing Penthouse Sky Lounge
-    const loungeGeo = new THREE.BoxGeometry(2.4, 1.5, 2.4);
+    // Sky Penthouse VIP Lounge
+    const loungeGeo = new THREE.BoxGeometry(2.6, 1.6, 2.6);
     const loungeMat = new THREE.MeshPhysicalMaterial({
         color: 0xf59e0b,
-        transmission: 0.7,
-        opacity: 1,
+        transmission: 0.75,
+        opacity: 0.95,
         transparent: true,
         roughness: 0.1,
         ior: 1.5
     });
     const lounge = new THREE.Mesh(loungeGeo, loungeMat);
-    lounge.position.set(-1.2, 8.25, 0);
+    lounge.position.set(-1.4, 8.8, 0);
     hotelGroup.add(lounge);
 
-    // Roof Spire with beacon
-    const spireGeo = new THREE.CylinderGeometry(0.04, 0.15, 2.5, 12);
-    const spireMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9 });
+    // Spire & Blinking Beacon
+    const spireGeo = new THREE.CylinderGeometry(0.04, 0.16, 2.8, 12);
+    const spireMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.95 });
     const spire = new THREE.Mesh(spireGeo, spireMat);
-    spire.position.set(-1.2, 9.8, 0);
+    spire.position.set(-1.4, 10.8, 0);
     hotelGroup.add(spire);
 
-    const beaconGeo = new THREE.SphereGeometry(0.18, 16, 16);
+    const beaconGeo = new THREE.SphereGeometry(0.2, 16, 16);
     const beaconMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
     const beacon = new THREE.Mesh(beaconGeo, beaconMat);
-    beacon.position.set(-1.2, 11.0, 0);
+    beacon.position.set(-1.4, 12.2, 0);
     hotelGroup.add(beacon);
 
-    // Floating Luxury Diamond Crystals / Particles
+    // Floating Golden Diamond Particles
     const particleGroup = new THREE.Group();
     scene.add(particleGroup);
-    const particleGeo = new THREE.OctahedronGeometry(0.25, 0);
-    const particleMat = new THREE.MeshStandardMaterial({
-        color: 0xd4af37,
-        roughness: 0.2,
-        metalness: 0.8
-    });
+    const diaGeo = new THREE.OctahedronGeometry(0.25, 0);
+    const diaMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85, roughness: 0.2 });
 
     const particles = [];
-    for (let i = 0; i < 24; i++) {
-        const p = new THREE.Mesh(particleGeo, particleMat);
-        const angle = (i / 24) * Math.PI * 2;
-        const radius = 6.5 + Math.random() * 3.5;
+    for (let i = 0; i < 28; i++) {
+        const p = new THREE.Mesh(diaGeo, diaMat);
+        const angle = (i / 28) * Math.PI * 2;
+        const radius = 6.5 + Math.random() * 4.0;
         p.position.set(
             Math.cos(angle) * radius,
-            2 + Math.random() * 8,
+            2 + Math.random() * 9,
             Math.sin(angle) * radius
         );
-        p.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
         particleGroup.add(p);
         particles.push({
             mesh: p,
-            speed: 0.005 + Math.random() * 0.01,
-            floatSpeed: 0.02 + Math.random() * 0.02,
+            speed: 0.006 + Math.random() * 0.012,
             initialY: p.position.y
         });
     }
 
-    // Mouse Interaction Parallax
-    let targetRotationX = 0;
-    let targetRotationY = 0;
-    let mouseX = 0;
-    let mouseY = 0;
-
-    window.addEventListener('mousemove', (e) => {
-        const rect = container.getBoundingClientRect();
-        if (e.clientX >= rect.left && e.clientX <= rect.right &&
-            e.clientY >= rect.top && e.clientY <= rect.bottom) {
-            mouseX = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-            mouseY = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
-            targetRotationY = mouseX * 0.4;
-            targetRotationX = mouseY * 0.2;
-        }
-    });
-
     // Resize Handler
-    function onWindowResize() {
+    window.addEventListener('resize', () => {
         if (!container) return;
         const newW = container.clientWidth;
         const newH = container.clientHeight;
@@ -229,30 +367,21 @@ function initHero3D() {
             camera.updateProjectionMatrix();
             renderer.setSize(newW, newH);
         }
-    }
-    window.addEventListener('resize', onWindowResize);
+    });
 
     // Animation Loop
     let clock = new THREE.Clock();
     function animate() {
         requestAnimationFrame(animate);
-        const elapsedTime = clock.getElapsedTime();
+        const time = clock.getElapsedTime();
 
-        // Beacon pulsing
-        beaconMat.color.setHSL(0, 0.9, 0.4 + 0.3 * Math.sin(elapsedTime * 6));
+        beaconMat.color.setHSL(0, 0.95, 0.4 + 0.35 * Math.sin(time * 6));
 
-        // Floating particles
         particles.forEach((p, idx) => {
             p.mesh.rotation.x += p.speed;
             p.mesh.rotation.y += p.speed * 1.5;
-            p.mesh.position.y = p.initialY + Math.sin(elapsedTime * 2 + idx) * 0.35;
+            p.mesh.position.y = p.initialY + Math.sin(time * 2 + idx) * 0.35;
         });
-
-        // Soft smooth mouse tilt on hotelGroup
-        if (!controls || !controls.state == -1) {
-            hotelGroup.rotation.y += (targetRotationY - hotelGroup.rotation.y) * 0.05;
-            hotelGroup.rotation.x += (targetRotationX - hotelGroup.rotation.x) * 0.05;
-        }
 
         if (controls) controls.update();
         renderer.render(scene, camera);
@@ -261,292 +390,155 @@ function initHero3D() {
 }
 
 // -------------------------------------------------------------
-// 2. INTERACTIVE 3D VIRTUAL SUITE EXPLORER (Three.js 360 Viewer)
+// 3. 3D SPATIAL CYLINDRICAL CAROUSEL (Showcase of Top Hotels)
 // -------------------------------------------------------------
-let roomScene, roomCamera, roomRenderer, roomControls;
-let roomLampLights = [];
-let roomSunLight = null;
-let isNightMode = false;
+let carouselCurrentIndex = 0;
+let carouselItemsCount = 0;
+let carouselAutoTimer = null;
+let isGridViewActive = false;
 
-function initRoom3D() {
-    const container = document.getElementById('room-3d-canvas-container');
-    if (!container || typeof THREE === 'undefined') return;
+function init3DSpatialCarousel() {
+    const stage = document.getElementById('carousel-3d-stage');
+    const ring = document.getElementById('carousel-3d-ring');
+    const items = document.querySelectorAll('.carousel-3d-card');
 
-    const width = container.clientWidth || 700;
-    const height = container.clientHeight || 420;
+    if (!stage || !ring || items.length === 0) return;
 
-    roomScene = new THREE.Scene();
-    roomCamera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
-    roomCamera.position.set(7, 5, 8);
+    carouselItemsCount = items.length;
+    const radius = 420; // 3D radius in px
+    const theta = 360 / carouselItemsCount;
 
-    roomRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    roomRenderer.setSize(width, height);
-    roomRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    roomRenderer.shadowMap.enabled = true;
-    roomRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-    container.innerHTML = '';
-    container.appendChild(roomRenderer.domElement);
-
-    if (typeof THREE.OrbitControls !== 'undefined') {
-        roomControls = new THREE.OrbitControls(roomCamera, roomRenderer.domElement);
-        roomControls.enableDamping = true;
-        roomControls.dampingFactor = 0.06;
-        roomControls.maxPolarAngle = Math.PI / 2.05;
-        roomControls.minDistance = 4;
-        roomControls.maxDistance = 15;
-        roomControls.target.set(0, 1, 0);
-    }
-
-    // Lighting Setup
-    const ambient = new THREE.AmbientLight(0xffffff, 0.7);
-    roomScene.add(ambient);
-
-    roomSunLight = new THREE.DirectionalLight(0xfff7ed, 1.3);
-    roomSunLight.position.set(8, 10, 5);
-    roomSunLight.castShadow = true;
-    roomSunLight.shadow.mapSize.width = 1024;
-    roomSunLight.shadow.mapSize.height = 1024;
-    roomScene.add(roomSunLight);
-
-    // Room Structure (Floor & Back Walls)
-    const roomGroup = new THREE.Group();
-    roomScene.add(roomGroup);
-
-    // Hardwood Floor
-    const floorGeo = new THREE.BoxGeometry(7, 0.2, 7);
-    const floorMat = new THREE.MeshStandardMaterial({
-        color: 0x27272a,
-        roughness: 0.4,
-        metalness: 0.1
+    // Arrange items on a 3D circle
+    items.forEach((item, i) => {
+        const itemAngle = theta * i;
+        item.dataset.angle = itemAngle;
+        item.style.transform = `rotateY(${itemAngle}deg) translateZ(${radius}px)`;
     });
-    const floor = new THREE.Mesh(floorGeo, floorMat);
-    floor.position.y = -0.1;
-    floor.receiveShadow = true;
-    roomGroup.add(floor);
 
-    // Luxury Carpet / Rug under bed
-    const rugGeo = new THREE.BoxGeometry(4.2, 0.05, 4.6);
-    const rugMat = new THREE.MeshStandardMaterial({
-        color: 0x3b82f6,
-        roughness: 0.9,
-        metalness: 0.05
-    });
-    const rug = new THREE.Mesh(rugGeo, rugMat);
-    rug.position.set(0, 0.02, 0);
-    rug.receiveShadow = true;
-    roomGroup.add(rug);
+    function updateCarouselRotation() {
+        const currentAngle = -carouselCurrentIndex * theta;
+        ring.style.transform = `translateZ(-${radius}px) rotateY(${currentAngle}deg)`;
 
-    // Back Wall (Accent Headboard Wall)
-    const backWallGeo = new THREE.BoxGeometry(7, 4.5, 0.2);
-    const backWallMat = new THREE.MeshStandardMaterial({
-        color: 0x18181b,
-        roughness: 0.7
-    });
-    const backWall = new THREE.Mesh(backWallGeo, backWallMat);
-    backWall.position.set(0, 2.15, -3.4);
-    backWall.receiveShadow = true;
-    roomGroup.add(backWall);
-
-    // Side Wall (Window Wall)
-    const sideWallGeo = new THREE.BoxGeometry(0.2, 4.5, 7);
-    const sideWallMat = new THREE.MeshStandardMaterial({
-        color: 0x27272a,
-        roughness: 0.6
-    });
-    const sideWall = new THREE.Mesh(sideWallGeo, sideWallMat);
-    sideWall.position.set(-3.4, 2.15, 0);
-    sideWall.receiveShadow = true;
-    roomGroup.add(sideWall);
-
-    // Panoramic Window Glass
-    const windowGeo = new THREE.PlaneGeometry(4.5, 3.2);
-    const windowMat = new THREE.MeshPhysicalMaterial({
-        color: 0x93c5fd,
-        transmission: 0.85,
-        opacity: 0.6,
-        transparent: true,
-        roughness: 0.1,
-        ior: 1.4
-    });
-    const windowMesh = new THREE.Mesh(windowGeo, windowMat);
-    windowMesh.rotation.y = Math.PI / 2;
-    windowMesh.position.set(-3.29, 2.3, 0);
-    roomGroup.add(windowMesh);
-
-    // Luxury King Bed: Base / Platform
-    const bedBaseGeo = new THREE.BoxGeometry(2.6, 0.4, 3.2);
-    const bedBaseMat = new THREE.MeshStandardMaterial({ color: 0x3f3f46, roughness: 0.3 });
-    const bedBase = new THREE.Mesh(bedBaseGeo, bedBaseMat);
-    bedBase.position.set(0, 0.2, -0.6);
-    bedBase.castShadow = true;
-    bedBase.receiveShadow = true;
-    roomGroup.add(bedBase);
-
-    // Mattress
-    const matGeo = new THREE.BoxGeometry(2.4, 0.45, 3.0);
-    const matMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.8 });
-    const mattress = new THREE.Mesh(matGeo, matMat);
-    mattress.position.set(0, 0.55, -0.6);
-    mattress.castShadow = true;
-    mattress.receiveShadow = true;
-    roomGroup.add(mattress);
-
-    // Duvet / Quilt (Royal Navy & Gold Accent)
-    const quiltGeo = new THREE.BoxGeometry(2.44, 0.2, 2.0);
-    const quiltMat = new THREE.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.5 });
-    const quilt = new THREE.Mesh(quiltGeo, quiltMat);
-    quilt.position.set(0, 0.7, 0.0);
-    quilt.castShadow = true;
-    roomGroup.add(quilt);
-
-    // Gold Bed Runner
-    const runnerGeo = new THREE.BoxGeometry(2.46, 0.22, 0.5);
-    const runnerMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, roughness: 0.3, metalness: 0.5 });
-    const runner = new THREE.Mesh(runnerGeo, runnerMat);
-    runner.position.set(0, 0.72, 0.6);
-    roomGroup.add(runner);
-
-    // Pillows
-    const pillowGeo = new THREE.BoxGeometry(0.9, 0.18, 0.5);
-    const pillowMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
-
-    const pillowLeft = new THREE.Mesh(pillowGeo, pillowMat);
-    pillowLeft.position.set(-0.6, 0.85, -1.7);
-    pillowLeft.rotation.x = 0.2;
-    pillowLeft.castShadow = true;
-    roomGroup.add(pillowLeft);
-
-    const pillowRight = pillowLeft.clone();
-    pillowRight.position.x = 0.6;
-    roomGroup.add(pillowRight);
-
-    // Bed Headboard
-    const headboardGeo = new THREE.BoxGeometry(3.6, 1.8, 0.2);
-    const headboardMat = new THREE.MeshStandardMaterial({
-        color: 0x52525b,
-        roughness: 0.6
-    });
-    const headboard = new THREE.Mesh(headboardGeo, headboardMat);
-    headboard.position.set(0, 1.4, -2.2);
-    headboard.castShadow = true;
-    roomGroup.add(headboard);
-
-    // Nightstands & Glowing Lamps (Left & Right)
-    const standGeo = new THREE.BoxGeometry(0.7, 0.6, 0.7);
-    const standMat = new THREE.MeshStandardMaterial({ color: 0x27272a, roughness: 0.3 });
-
-    [-1.9, 1.9].forEach((xPos) => {
-        const stand = new THREE.Mesh(standGeo, standMat);
-        stand.position.set(xPos, 0.3, -1.8);
-        stand.castShadow = true;
-        stand.receiveShadow = true;
-        roomGroup.add(stand);
-
-        // Lamp Base & Stem
-        const stemGeo = new THREE.CylinderGeometry(0.04, 0.08, 0.45, 16);
-        const stemMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9 });
-        const stem = new THREE.Mesh(stemGeo, stemMat);
-        stem.position.set(xPos, 0.75, -1.8);
-        roomGroup.add(stem);
-
-        // Lamp Shade
-        const shadeGeo = new THREE.CylinderGeometry(0.2, 0.3, 0.35, 16);
-        const shadeMat = new THREE.MeshStandardMaterial({
-            color: 0xfef3c7,
-            emissive: 0xf59e0b,
-            emissiveIntensity: 0.6
+        // Highlight active front card
+        items.forEach((item, i) => {
+            const normalizedIndex = (carouselCurrentIndex % carouselItemsCount + carouselItemsCount) % carouselItemsCount;
+            if (i === normalizedIndex) {
+                item.classList.add('active-3d-card');
+                item.style.opacity = '1';
+                item.style.filter = 'drop-shadow(0 20px 30px rgba(37, 99, 235, 0.3))';
+            } else {
+                item.classList.remove('active-3d-card');
+                item.style.opacity = '0.75';
+                item.style.filter = 'none';
+            }
         });
-        const shade = new THREE.Mesh(shadeGeo, shadeMat);
-        shade.position.set(xPos, 1.05, -1.8);
-        roomGroup.add(shade);
+    }
 
-        // Warm Lamp Point Light
-        const lampLight = new THREE.PointLight(0xfbbf24, 1.2, 4.5);
-        lampLight.position.set(xPos, 1.1, -1.8);
-        lampLight.castShadow = true;
-        roomGroup.add(lampLight);
-        roomLampLights.push(lampLight);
+    updateCarouselRotation();
+
+    // Next / Prev Global Controllers
+    window.rotate3DCarousel = function (direction) {
+        carouselCurrentIndex += direction;
+        updateCarouselRotation();
+        resetAutoRotateTimer();
+    };
+
+    window.toggleCarouselViewMode = function () {
+        isGridViewActive = !isGridViewActive;
+        const wrapper = document.getElementById('carousel-3d-wrapper');
+        const gridView = document.getElementById('carousel-grid-fallback');
+        const btn = document.getElementById('btn-toggle-view-mode');
+
+        if (isGridViewActive) {
+            if (wrapper) wrapper.classList.add('d-none');
+            if (gridView) gridView.classList.remove('d-none');
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-cube text-warning ms-1"></i> بازگشت به نمای استوانه سه‌بعدی';
+            if (carouselAutoTimer) clearInterval(carouselAutoTimer);
+        } else {
+            if (wrapper) wrapper.classList.remove('d-none');
+            if (gridView) gridView.classList.add('d-none');
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-table-cells ms-1"></i> مشاهده به صورت شبکه‌ای';
+            startAutoRotate();
+        }
+    };
+
+    // Auto rotate every 4.5 seconds
+    function startAutoRotate() {
+        if (carouselAutoTimer) clearInterval(carouselAutoTimer);
+        carouselAutoTimer = setInterval(() => {
+            if (!isGridViewActive) {
+                carouselCurrentIndex++;
+                updateCarouselRotation();
+            }
+        }, 4500);
+    }
+
+    function resetAutoRotateTimer() {
+        if (carouselAutoTimer) clearInterval(carouselAutoTimer);
+        startAutoRotate();
+    }
+
+    startAutoRotate();
+
+    // Pause on mouse enter
+    stage.addEventListener('mouseenter', () => {
+        if (carouselAutoTimer) clearInterval(carouselAutoTimer);
+    });
+    stage.addEventListener('mouseleave', () => {
+        resetAutoRotateTimer();
     });
 
-    // Modern Lounge Chair
-    const chairBaseGeo = new THREE.BoxGeometry(1.0, 0.4, 1.0);
-    const chairMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.6 });
-    const chair = new THREE.Mesh(chairBaseGeo, chairMat);
-    chair.position.set(-1.8, 0.2, 1.4);
-    chair.rotation.y = Math.PI / 4;
-    chair.castShadow = true;
-    roomGroup.add(chair);
+    // Touch & Drag Support
+    let startX = 0;
+    let isDragging = false;
 
-    const chairBackGeo = new THREE.BoxGeometry(1.0, 0.9, 0.2);
-    const chairBack = new THREE.Mesh(chairBackGeo, chairMat);
-    chairBack.position.set(-2.15, 0.75, 1.05);
-    chairBack.rotation.y = Math.PI / 4;
-    chairBack.castShadow = true;
-    roomGroup.add(chairBack);
+    stage.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.clientX;
+    });
 
-    // Resize Handler
-    function onRoomResize() {
-        if (!container) return;
-        const newW = container.clientWidth;
-        const newH = container.clientHeight;
-        if (newW > 0 && newH > 0) {
-            roomCamera.aspect = newW / newH;
-            roomCamera.updateProjectionMatrix();
-            roomRenderer.setSize(newW, newH);
+    window.addEventListener('mouseup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        const diff = e.clientX - startX;
+        if (diff > 50) {
+            rotate3DCarousel(-1);
+        } else if (diff < -50) {
+            rotate3DCarousel(1);
         }
-    }
-    window.addEventListener('resize', onRoomResize);
+    });
 
-    // Animation Loop
-    function animateRoom() {
-        requestAnimationFrame(animateRoom);
-        if (roomControls) roomControls.update();
-        roomRenderer.render(roomScene, roomCamera);
-    }
-    animateRoom();
+    stage.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+    }, { passive: true });
+
+    stage.addEventListener('touchend', (e) => {
+        const diff = e.changedTouches[0].clientX - startX;
+        if (diff > 50) {
+            rotate3DCarousel(-1);
+        } else if (diff < -50) {
+            rotate3DCarousel(1);
+        }
+    }, { passive: true });
 }
 
-// Toggle Day / Night Lighting Mode in 3D Suite Viewer
-window.toggleRoom3DLighting = function () {
-    isNightMode = !isNightMode;
-    const btn = document.getElementById('btn-toggle-night');
-
-    if (isNightMode) {
-        if (roomSunLight) roomSunLight.intensity = 0.15;
-        roomLampLights.forEach(l => l.intensity = 2.4);
-        if (btn) {
-            btn.innerHTML = '<i class="fa-solid fa-sun text-warning ms-1"></i> تغییر به حالت روز (Day Mode)';
-            btn.classList.replace('btn-outline-light', 'btn-warning');
-        }
-    } else {
-        if (roomSunLight) roomSunLight.intensity = 1.3;
-        roomLampLights.forEach(l => l.intensity = 1.0);
-        if (btn) {
-            btn.innerHTML = '<i class="fa-solid fa-moon text-info ms-1"></i> تغییر به حالت شب (Night Mode)';
-            btn.classList.replace('btn-warning', 'btn-outline-light');
-        }
-    }
-};
-
-// Reset 3D Camera View
-window.resetRoom3DView = function () {
-    if (roomCamera && roomControls) {
-        roomCamera.position.set(7, 5, 8);
-        roomControls.target.set(0, 1, 0);
-        roomControls.update();
-    }
-};
-
 // -------------------------------------------------------------
-// 3. 3D CARD PARALLAX & TILT PHYSICS (Vanilla Spatial Interaction)
+// 4. 3D CARD PARALLAX TILT & SPECULAR GLARE PHYSICS
 // -------------------------------------------------------------
-function init3DTiltCards() {
-    const cards = document.querySelectorAll('.hotel-card, .room-card, .hero-search-card, .feature-3d-card');
+function init3DTiltAndGlare() {
+    const cards = document.querySelectorAll('.hotel-card, .room-card, .hero-search-card, .stat-3d-card, .feature-3d-box');
 
     cards.forEach((card) => {
         card.style.transformStyle = 'preserve-3d';
         card.style.transition = 'transform 0.15s ease-out, box-shadow 0.25s ease';
+
+        // Add specular glare overlay element if not present
+        let glare = card.querySelector('.card-3d-glare');
+        if (!glare) {
+            glare = document.createElement('div');
+            glare.className = 'card-3d-glare';
+            card.appendChild(glare);
+        }
 
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
@@ -556,23 +548,30 @@ function init3DTiltCards() {
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
 
-            const rotateX = ((y - centerY) / centerY) * -9; // Max 9 deg tilt
-            const rotateY = ((x - centerX) / centerX) * 9;
+            const rotateX = ((y - centerY) / centerY) * -11; // Max 11 deg tilt
+            const rotateY = ((x - centerX) / centerX) * 11;
 
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            card.style.transform = `perspective(1100px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.025, 1.025, 1.025)`;
 
-            // Depth pop on inner children
-            const popElements = card.querySelectorAll('.card-img-container, .stars-badge, .price-tag, .badge');
-            popElements.forEach(el => {
-                el.style.transform = 'translateZ(25px)';
+            // Glare reflection position
+            const glareX = (x / rect.width) * 100;
+            const glareY = (y / rect.height) * 100;
+            glare.style.background = `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255, 255, 255, 0.22) 0%, transparent 65%)`;
+            glare.style.opacity = '1';
+
+            // Popped elements forward on Z axis
+            const popped = card.querySelectorAll('.card-img-container, .stars-badge, .price-tag, .badge, .btn');
+            popped.forEach(el => {
+                el.style.transform = 'translateZ(26px)';
                 el.style.transition = 'transform 0.15s ease-out';
             });
         });
 
         card.addEventListener('mouseleave', () => {
-            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-            const popElements = card.querySelectorAll('.card-img-container, .stars-badge, .price-tag, .badge');
-            popElements.forEach(el => {
+            card.style.transform = 'perspective(1100px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+            glare.style.opacity = '0';
+            const popped = card.querySelectorAll('.card-img-container, .stars-badge, .price-tag, .badge, .btn');
+            popped.forEach(el => {
                 el.style.transform = 'translateZ(0px)';
             });
         });
@@ -583,7 +582,8 @@ function init3DTiltCards() {
 // INITIALIZE ON DOM READY
 // -------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-    initHero3D();
-    initRoom3D();
-    init3DTiltCards();
+    initGlobal3DBackground();
+    initHero3DScene();
+    init3DSpatialCarousel();
+    init3DTiltAndGlare();
 });

@@ -10,14 +10,13 @@
     --secondary-color: #0d9488;
     --bg-dark: #0b132b;
     --bg-darker: #060a17;
-    --bg-card-dark: #131c38;
     --bg-light: #f8fafc;
     --surface-light: #ffffff;
     --text-primary: #0f172a;
     --text-muted: #64748b;
     --card-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
-    --card-3d-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.15), 0 1px 3px rgba(0,0,0,0.05);
-    --glass-bg: rgba(255, 255, 255, 0.85);
+    --card-3d-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.2), 0 1px 3px rgba(0,0,0,0.05);
+    --glass-bg: rgba(255, 255, 255, 0.88);
     --glass-border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
@@ -36,29 +35,16 @@ body {
     position: relative;
 }
 
-/* Ambient Background Mesh (Unifies all sections, eliminating disjointed look) */
-body::before {
-    content: '';
+/* Global Hardware-Accelerated 3D WebGL Background Canvas */
+#global-3d-canvas {
     position: fixed;
     top: 0;
-    right: 0;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(37, 99, 235, 0.06) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: -1;
-}
-
-body::after {
-    content: '';
-    position: fixed;
-    bottom: 0;
     left: 0;
-    width: 700px;
-    height: 700px;
-    background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 70%);
+    width: 100vw;
+    height: 100vh;
     pointer-events: none;
     z-index: -1;
+    opacity: 0.7;
 }
 
 main {
@@ -127,10 +113,10 @@ main {
 .hero-section-3d {
     background: linear-gradient(145deg, #090d1a 0%, #111a36 50%, #0e172e 100%);
     color: #ffffff;
-    padding: 3.5rem 1rem 5.5rem 1rem;
+    padding: 3.5rem 1rem 5.8rem 1rem;
     position: relative;
     border-radius: 0 0 2.5rem 2.5rem;
-    box-shadow: 0 20px 40px -15px rgba(11, 19, 43, 0.5);
+    box-shadow: 0 20px 45px -15px rgba(11, 19, 43, 0.6);
     overflow: hidden;
 }
 
@@ -139,9 +125,9 @@ main {
     position: absolute;
     top: -50px;
     right: 15%;
-    width: 450px;
-    height: 450px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.22) 0%, transparent 70%);
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
     pointer-events: none;
 }
 
@@ -150,10 +136,17 @@ main {
     position: absolute;
     bottom: -50px;
     left: 10%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+    width: 420px;
+    height: 420px;
+    background: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, transparent 70%);
     pointer-events: none;
+}
+
+.text-3d-gold {
+    background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #d97706 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.3));
 }
 
 #hero-3d-container {
@@ -180,7 +173,7 @@ main {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
 }
 
 .pulse-dot {
@@ -198,8 +191,30 @@ main {
     100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
+/* 3D Floating Hero Stat Cards */
+.stat-3d-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 1rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+    animation: float3D 6s ease-in-out infinite;
+}
+
+.stat-3d-card:hover {
+    transform: translateY(-6px) scale(1.04);
+    border-color: rgba(212, 175, 55, 0.5);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+@keyframes float3D {
+    0%, 100% { transform: translateY(0px) rotateX(0deg); }
+    50% { transform: translateY(-7px) rotateX(4deg); }
+}
+
 /* --------------------------------------------------
-   Floating Glass Search Card
+   Floating Glass Search Card with 3D Tilt
 -------------------------------------------------- */
 .hero-search-card {
     background: rgba(255, 255, 255, 0.95);
@@ -207,10 +222,10 @@ main {
     -webkit-backdrop-filter: blur(20px);
     border-radius: 1.5rem;
     padding: 1.8rem 2rem;
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    box-shadow: 0 25px 40px -10px rgba(15, 23, 42, 0.18), 0 10px 20px -8px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 30px 50px -10px rgba(15, 23, 42, 0.2), 0 10px 20px -8px rgba(0, 0, 0, 0.08);
     color: #1e293b;
-    margin-top: -3.8rem;
+    margin-top: -4.0rem;
     position: relative;
     z-index: 20;
     transform-style: preserve-3d;
@@ -234,12 +249,90 @@ main {
 }
 
 /* --------------------------------------------------
+   3D Cylindrical Carousel Showcase
+-------------------------------------------------- */
+.carousel-3d-stage-wrapper {
+    perspective: 1400px;
+    width: 100%;
+    min-height: 480px;
+    padding: 2rem 0;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at center, rgba(37, 99, 235, 0.05) 0%, transparent 70%);
+    border-radius: 2rem;
+}
+
+.carousel-3d-stage {
+    width: 100%;
+    height: 430px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: grab;
+    user-select: none;
+}
+
+.carousel-3d-stage:active {
+    cursor: grabbing;
+}
+
+.carousel-3d-ring {
+    width: 320px;
+    height: 410px;
+    position: absolute;
+    transform-style: preserve-3d;
+    transition: transform 0.85s cubic-bezier(0.2, 0.85, 0.2, 1);
+}
+
+.carousel-3d-card {
+    position: absolute;
+    width: 320px;
+    height: 410px;
+    left: 0;
+    top: 0;
+    border-radius: 1.3rem;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    backface-visibility: hidden;
+    transition: opacity 0.5s ease, filter 0.5s ease, border-color 0.4s ease;
+}
+
+.carousel-3d-card.active-3d-card {
+    border: 2px solid var(--gold-accent) !important;
+    box-shadow: 0 25px 45px -10px rgba(37, 99, 235, 0.35), 0 0 15px rgba(212, 175, 55, 0.3) !important;
+}
+
+.carousel-nav-btn {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #1e293b;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.2s ease;
+}
+
+.carousel-nav-btn:hover {
+    background: var(--primary-color);
+    transform: scale(1.1);
+    color: #ffffff;
+}
+
+/* --------------------------------------------------
    3D Cards (Hotel & Room Cards with Spatial Depth)
 -------------------------------------------------- */
 .hotel-card, .room-card {
     background: #ffffff;
     border-radius: 1.25rem;
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.85);
     overflow: hidden;
     box-shadow: var(--card-shadow);
     height: 100%;
@@ -248,11 +341,25 @@ main {
     transform-style: preserve-3d;
     transition: transform 0.25s ease-out, box-shadow 0.25s ease;
     will-change: transform;
+    position: relative;
 }
 
 .hotel-card:hover, .room-card:hover {
     box-shadow: var(--card-3d-shadow);
-    border-color: rgba(147, 197, 253, 0.8);
+    border-color: rgba(147, 197, 253, 0.9);
+}
+
+.card-3d-glare {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    border-radius: 1.25rem;
+    z-index: 5;
 }
 
 .card-img-container {
@@ -278,7 +385,7 @@ main {
     position: absolute;
     top: 12px;
     right: 12px;
-    background: rgba(15, 23, 42, 0.75);
+    background: rgba(15, 23, 42, 0.78);
     color: #fbbf24;
     padding: 5px 12px;
     border-radius: 20px;
@@ -286,7 +393,7 @@ main {
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-    transform: translateZ(25px);
+    transform: translateZ(26px);
 }
 
 .price-tag {
@@ -298,79 +405,39 @@ main {
 }
 
 /* --------------------------------------------------
-   3D Virtual Suite / Room Explorer Section
+   3D Feature Boxes
 -------------------------------------------------- */
-.suite-3d-showcase-section {
-    background: linear-gradient(135deg, #0b132b 0%, #1c2541 60%, #1e1b4b 100%);
-    border-radius: 2rem;
-    padding: 2.5rem 2rem;
-    color: #ffffff;
-    box-shadow: 0 25px 45px -12px rgba(11, 19, 43, 0.6);
-    position: relative;
-    overflow: hidden;
-    margin: 4rem auto;
+.feature-3d-box {
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 1.25rem;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.suite-3d-showcase-section::before {
-    content: '';
-    position: absolute;
-    top: -40px;
-    left: -40px;
-    width: 320px;
-    height: 320px;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%);
-    pointer-events: none;
+.feature-3d-box:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--card-3d-shadow);
+    border-color: rgba(37, 99, 235, 0.3);
 }
 
-#room-3d-canvas-container {
-    width: 100%;
-    height: 420px;
-    min-height: 360px;
-    border-radius: 1.5rem;
-    background: radial-gradient(circle at center, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.95) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
-    position: relative;
-    cursor: grab;
-}
-
-#room-3d-canvas-container:active {
-    cursor: grabbing;
-}
-
-.suite-3d-controls {
-    position: absolute;
-    bottom: 18px;
-    left: 20px;
-    right: 20px;
+.feature-icon-3d {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(212, 175, 55, 0.08));
+    border: 1px solid rgba(226, 232, 240, 0.8);
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    pointer-events: none;
-    z-index: 10;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transform: perspective(300px) rotateY(-8deg);
+    transition: transform 0.3s ease;
 }
 
-.suite-3d-controls button {
-    pointer-events: auto;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-/* Feature 3D Highlight Cards */
-.feature-3d-card {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 1rem;
-    padding: 1.2rem;
-    color: #ffffff;
-    transition: all 0.3s ease;
-}
-
-.feature-3d-card:hover {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(212, 175, 55, 0.5);
-    transform: translateY(-4px);
+.feature-3d-box:hover .feature-icon-3d {
+    transform: perspective(300px) rotateY(15deg) scale(1.1);
 }
 
 /* --------------------------------------------------
@@ -388,21 +455,6 @@ main {
     background: linear-gradient(135deg, #1d4ed8, #1e40af);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
-}
-
-.btn-gold {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: #ffffff !important;
-    border: none;
-    font-weight: 700;
-    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
-    transition: all 0.25s ease;
-}
-
-.btn-gold:hover {
-    background: linear-gradient(135deg, #d97706, #b45309);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.55);
 }
 
 /* --------------------------------------------------
@@ -488,11 +540,13 @@ main {
 footer {
     background: linear-gradient(180deg, #0f172a 0%, #060a17 100%);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    z-index: 10;
 }
 
 /* Printable Voucher */
 @media print {
-    .navbar, footer, .btn-print, .no-print, #hero-3d-container, #room-3d-canvas-container {
+    .navbar, footer, .btn-print, .no-print, #hero-3d-container, #global-3d-canvas, .carousel-3d-stage-wrapper {
         display: none !important;
     }
     body {
