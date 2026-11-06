@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}مشاهده رزروهای انجام شده | پنل مدیریت هتل{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'bookings:manager_dashboard' %}">داشبورد مدیر</a></li>
+            <li class="breadcrumb-item active">رزروهای انجام شده</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="fa-solid fa-list-check text-primary ms-2"></i>
+                مشاهده رزروهای انجام شده هتل‌ها
+            </h4>
+            <p class="text-muted small mb-0">لیست تمامی رزروهای ثبت‌شده با قابلیت جستجو، فیلتر و مدیریت وضعیت</p>
+        </div>
+        <a href="{% url 'bookings:manager_room_status' %}" class="btn btn-outline-warning btn-sm px-3 rounded-pill text-dark">
+            <i class="fa-solid fa-door-open ms-1"></i> مشاهده اتاق‌های آزاد و اشغال
+        </a>
+    </div>
+
+    <!-- فیلترها و جستجو -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <input type="text" name="q" value="{{ search_q }}" class="form-control form-control-sm" placeholder="جستجوی کد رهگیری، نام یا شماره مسافر...">
+            </div>
+            <div class="col-md-3">
+                <select name="hotel" class="form-select form-select-sm">
+                    <option value="">تمامی هتل‌ها</option>
+                    {% for h in hotels %}
+                        <option value="{{ h.id }}" {% if selected_hotel == h.id|stringformat:"i" %}selected{% endif %}>{{ h.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">همه وضعیت‌ها</option>
+                    <option value="confirmed" {% if selected_status == 'confirmed' %}selected{% endif %}>تأیید شده</option>
+                    <option value="cancelled" {% if selected_status == 'cancelled' %}selected{% endif %}>لغو شده</option>
+                    <option value="completed" {% if selected_status == 'completed' %}selected{% endif %}>به پایان رسیده</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-primary btn-sm flex-fill fw-bold">فیلتر</button>
+                <a href="{% url 'bookings:manager_bookings' %}" class="btn btn-outline-secondary btn-sm">بازنشانی</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- جدول رزروها -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                    <tr>
+                        <th>کد رهگیری</th>
+                        <th>هتل</th>
+                        <th>اتاق</th>
+                        <th>مهمان</th>
+                        <th>شماره تماس</th>
+                        <th>تاریخ ورود / خروج</th>
+                        <th>تعداد</th>
+                        <th>مبلغ نهایی</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in bookings %}
+                        <tr>
+                            <td class="fw-bold font-monospace text-primary">{{ b.tracking_code }}</td>
+                            <td>{{ b.room_type.hotel.name }}</td>
+                            <td>{{ b.room_type.title }}</td>
+                            <td>{{ b.guest_name }}</td>
+                            <td class="small">{{ b.guest_phone }}</td>
+                            <td class="small">
+                                <div>ورود: {{ b.check_in }}</div>
+                                <div>خروج: {{ b.check_out }}</div>
+                            </td>
+                            <td>{{ b.rooms_count }} اتاق ({{ b.nights_count }} شب)</td>
+                            <td class="fw-bold text-success">{{ b.final_price|floatformat:0 }} تومان</td>
+                            <td>
+                                {% if b.status == 'confirmed' %}
+                                    <span class="badge bg-success-subtle text-success py-1 px-2 rounded-pill">تأیید شده</span>
+                                {% elif b.status == 'cancelled' %}
+                                    <span class="badge bg-danger-subtle text-danger py-1 px-2 rounded-pill">لغو شده</span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary py-1 px-2 rounded-pill">{{ b.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="{% url 'bookings:booking_detail' b.tracking_code %}" class="btn btn-sm btn-outline-primary py-0 px-2" title="مشاهده فاکتور">
+                                        واچر
+                                    </a>
+                                    {% if b.status == 'confirmed' %}
+                                        <a href="{% url 'bookings:cancel_booking' b.id %}" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="return confirm('آیا از لغو این رزرو مطمئن هستید؟');" title="لغو رزرو">
+                                            لغو
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center py-5 text-muted">
+                                رزروی با این مشخصات یافت نشد.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

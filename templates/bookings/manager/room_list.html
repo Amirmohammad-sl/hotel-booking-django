@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}انواع اتاق‌های {{ hotel.name }} | پنل مدیریت هتل{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'bookings:manager_dashboard' %}">داشبورد مدیر</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'bookings:manager_hotels' %}">هتل‌های من</a></li>
+            <li class="breadcrumb-item active">اتاق‌های {{ hotel.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="fa-solid fa-bed text-primary ms-2"></i>
+                انواع اتاق‌های هتل «{{ hotel.name }}»
+            </h4>
+            <p class="text-muted small mb-0">تعریف و تنظیم ظرفیت، قیمت هر شب، موجودی و امکانات هر مدل اتاق</p>
+        </div>
+        <a href="{% url 'bookings:manager_room_create' hotel.id %}" class="btn btn-primary btn-sm px-3 rounded-pill">
+            <i class="fa-solid fa-plus ms-1"></i> تعریف اتاق جدید
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {% for room in rooms %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 p-3">
+                    {% if room.image %}
+                        <div style="height: 160px; border-radius: 8px; overflow: hidden;" class="mb-3">
+                            <img src="{{ room.image.url }}" alt="{{ room.title }}" class="w-100 h-100" style="object-fit: cover;">
+                        </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="fw-bold fs-6 mb-0">{{ room.title }}</h5>
+                        <span class="badge bg-primary-subtle text-primary">
+                            <i class="fa-solid fa-users ms-1"></i> {{ room.capacity }} نفره
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between text-muted small mb-2">
+                        <span>موجودی کل در هتل:</span>
+                        <b class="text-dark">{{ room.total_rooms }} اتاق</b>
+                    </div>
+
+                    <div class="d-flex justify-content-between text-muted small mb-3">
+                        <span>قیمت هر شب:</span>
+                        <b class="text-primary fs-6">{{ room.price_per_night|floatformat:0 }} تومان</b>
+                    </div>
+
+                    <!-- امکانات -->
+                    <div class="mb-3">
+                        {% for a in room.amenities.all %}
+                            <span class="badge bg-light text-dark border me-1 mb-1 small" style="font-size: 0.7rem;">
+                                <i class="{{ a.icon }} text-primary ms-1"></i> {{ a.name }}
+                            </span>
+                        {% empty %}
+                            <small class="text-muted">بدون امکانات خاص</small>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mt-auto pt-3 border-top d-flex gap-2">
+                        <a href="{% url 'bookings:manager_room_edit' room.id %}" class="btn btn-outline-secondary btn-sm flex-fill">
+                            <i class="fa-solid fa-pen ms-1"></i> ویرایش اطلاعات
+                        </a>
+                        <a href="{% url 'hotels:room_detail' room.id %}" target="_blank" class="btn btn-outline-info btn-sm flex-fill">
+                            <i class="fa-solid fa-calendar-days ms-1"></i> تقویم ظرفیت
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5 text-muted">
+                <i class="fa-solid fa-bed fa-3x mb-3 text-secondary opacity-50"></i>
+                <h5 class="fw-bold">هنوز هیچ نوع اتاقی برای این هتل تعریف نکرده‌اید!</h5>
+                <p class="small text-secondary mb-3">برای اینکه مسافران بتوانند هتل شما را رزرو کنند، حداقل یک نوع اتاق تعریف کنید.</p>
+                <a href="{% url 'bookings:manager_room_create' hotel.id %}" class="btn btn-primary px-4 rounded-pill">
+                    تعریف نوع اتاق جدید
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

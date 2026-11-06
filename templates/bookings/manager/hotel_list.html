@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}هتل‌های من | پنل مدیریت هتل{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="fa-solid fa-hotel text-primary ms-2"></i>لیست هتل‌های تحت مدیریت شما</h4>
+            <p class="text-muted small mb-0">تعریف، ویرایش اطلاعات هتل و مدیریت انواع اتاق‌ها</p>
+        </div>
+        <a href="{% url 'bookings:manager_hotel_create' %}" class="btn btn-primary btn-sm px-3 rounded-pill">
+            <i class="fa-solid fa-plus ms-1"></i> تعریف هتل جدید
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {% for hotel in hotels %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                    <div style="height: 180px; position: relative;">
+                        {% if hotel.image %}
+                            <img src="{{ hotel.image.url }}" alt="{{ hotel.name }}" class="w-100 h-100" style="object-fit: cover;">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80" alt="{{ hotel.name }}" class="w-100 h-100" style="object-fit: cover;">
+                        {% endif %}
+                        <div class="stars-badge">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= hotel.stars %}
+                                    <i class="fa-solid fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="p-3 d-flex flex-column flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="fw-bold fs-6 mb-0">{{ hotel.name }}</h5>
+                            <span class="badge bg-secondary-subtle text-secondary">{{ hotel.city }}</span>
+                        </div>
+                        <p class="text-muted small text-truncate mb-3">{{ hotel.address }}</p>
+
+                        <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
+                            <span><i class="fa-solid fa-bed text-primary ms-1"></i>{{ hotel.rooms.count }} مدل اتاق تعریف‌شده</span>
+                            <span><i class="fa-solid fa-star text-warning ms-1"></i>{{ hotel.average_rating }} امتیاز</span>
+                        </div>
+
+                        <div class="mt-auto pt-2 border-top d-grid gap-2">
+                            <a href="{% url 'bookings:manager_rooms' hotel.id %}" class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-bed ms-1"></i> مدیریت و تعریف اتاق‌ها
+                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'bookings:manager_hotel_edit' hotel.id %}" class="btn btn-outline-secondary btn-sm flex-fill">
+                                    <i class="fa-solid fa-pen ms-1"></i> ویرایش
+                                </a>
+                                <a href="{% url 'hotels:hotel_detail' hotel.id %}" target="_blank" class="btn btn-outline-info btn-sm flex-fill">
+                                    <i class="fa-solid fa-eye ms-1"></i> نمایش
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5 text-muted">
+                <i class="fa-solid fa-hotel fa-3x mb-3 text-secondary opacity-50"></i>
+                <h5 class="fw-bold">شما هنوز هیچ هتلی تعریف نکرده‌اید!</h5>
+                <p class="small text-secondary mb-3">برای شروع، اولین هتل خود را با مشخصات کامل ثبت نمایید.</p>
+                <a href="{% url 'bookings:manager_hotel_create' %}" class="btn btn-primary px-4 rounded-pill">
+                    تعریف هتل جدید
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

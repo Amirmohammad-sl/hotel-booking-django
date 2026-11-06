@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} | پنل مدیریت هتل{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'bookings:manager_dashboard' %}">داشبورد مدیر</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'bookings:manager_rooms' hotel.id %}">اتاق‌های {{ hotel.name }}</a></li>
+            <li class="breadcrumb-item active">{{ title }}</li>
+        </ol>
+    </nav>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+        <h4 class="fw-bold mb-4 border-bottom pb-3">
+            <i class="fa-solid fa-bed text-primary ms-2"></i> {{ title }}
+        </h4>
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">عنوان اتاق</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}<div class="text-danger small">{{ form.title.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">ظرفیت نفرات</label>
+                    {{ form.capacity }}
+                    {% if form.capacity.errors %}<div class="text-danger small">{{ form.capacity.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">موجودی کل این اتاق در هتل</label>
+                    {{ form.total_rooms }}
+                    {% if form.total_rooms.errors %}<div class="text-danger small">{{ form.total_rooms.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">قیمت هر شب اقامت (تومان)</label>
+                    {{ form.price_per_night }}
+                    {% if form.price_per_night.errors %}<div class="text-danger small">{{ form.price_per_night.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">تصویر اتاق</label>
+                    {{ form.image }}
+                    {% if form.image.errors %}<div class="text-danger small">{{ form.image.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">امکانات اتاق</label>
+                <div class="card bg-light border-0 p-3 rounded-3">
+                    <div class="row g-2">
+                        {% for choice in form.amenities %}
+                            <div class="col-md-4 col-sm-6">
+                                <div class="form-check">
+                                    {{ choice.tag }}
+                                    <label class="form-check-label small" for="{{ choice.id_for_label }}">
+                                        {{ choice.choice_label }}
+                                    </label>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label small fw-semibold">توضیحات و امکانات اختصاصی اتاق</label>
+                {{ form.description }}
+                {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4 py-2 fw-bold rounded-pill">
+                    <i class="fa-solid fa-floppy-disk ms-1"></i> ذخیره نوع اتاق
+                </button>
+                <a href="{% url 'bookings:manager_rooms' hotel.id %}" class="btn btn-outline-secondary px-4 py-2 rounded-pill">
+                    انصراف
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

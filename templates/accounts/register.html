@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}ثبت‌نام در سامانه | آسایش هتل{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex p-3 mb-2">
+                        <i class="fa-solid fa-user-plus fa-2x"></i>
+                    </div>
+                    <h4 class="fw-bold">ثبت‌نام در سامانه هتل</h4>
+                    <p class="text-muted small">اطلاعات خود را جهت ساخت حساب کاربری وارد کنید</p>
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-primary">نوع حساب کاربری</label>
+                        {{ form.role }}
+                        <div class="form-text small">مدیر هتل امکان تعریف هتل، اتاق‌ها و مشاهده وضعیت رزروها را خواهد داشت.</div>
+                        {% if form.role.errors %}
+                            <div class="text-danger small mt-1">{{ form.role.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">نام</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">نام خانوادگی</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">نام کاربری</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">شماره همراه</label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                                <div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">ایمیل</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- بخش تنظیمات پیشنهاد هوشمند هتل -->
+                    <div class="card bg-light border-0 p-3 mb-4 rounded-3">
+                        <h6 class="fw-bold small text-secondary mb-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-warning ms-1"></i>
+                            تنظیمات هوشمند پیشنهاد هتل (اختیاری)
+                        </h6>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">شهر مورد علاقه</label>
+                                {{ form.favorite_city }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">حداقل بودجه هر شب</label>
+                                {{ form.preferred_min_price }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-muted">حداکثر بودجه هر شب</label>
+                                {{ form.preferred_max_price }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">رمز عبور</label>
+                            {{ form.password }}
+                            {% if form.password.errors %}
+                                <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">تکرار رمز عبور</label>
+                            {{ form.confirm_password }}
+                            {% if form.confirm_password.errors %}
+                                <div class="text-danger small mt-1">{{ form.confirm_password.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold rounded-3 mb-3">
+                        <i class="fa-solid fa-user-check ms-1"></i> تکمیل ثبت‌نام و ورود
+                    </button>
+                </form>
+
+                <div class="border-top pt-3 text-center small text-muted">
+                    قبلاً ثبت‌نام کرده‌اید؟ 
+                    <a href="{% url 'accounts:login' %}" class="text-primary text-decoration-none fw-bold">وارد شوید</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

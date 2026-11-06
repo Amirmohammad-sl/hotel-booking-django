@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}داشبورد مدیریت هتل | آسایش هتل{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="fa-solid fa-gauge-high text-primary ms-2"></i>
+                داشبورد اختصاصی مدیر هتل
+            </h4>
+            <p class="text-muted small mb-0">مدیریت هتل‌ها، نظارت بر رزروها، کنترل وضعیت اتاق‌های آزاد و تخفیف‌ها</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'bookings:manager_hotel_create' %}" class="btn btn-primary btn-sm px-3 rounded-pill">
+                <i class="fa-solid fa-plus ms-1"></i> تعریف هتل جدید
+            </a>
+            <a href="{% url 'bookings:manager_discounts' %}" class="btn btn-outline-danger btn-sm px-3 rounded-pill">
+                <i class="fa-solid fa-tags ms-1"></i> کدهای تخفیف
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="manager-stat-card bg-gradient-blue">
+                <div>
+                    <h6 class="text-white-50 small mb-1">تعداد هتل‌ها</h6>
+                    <h3 class="fw-bold mb-0">{{ hotels_count }} هتل</h3>
+                </div>
+                <i class="fa-solid fa-hotel fa-2x text-white-50"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="manager-stat-card bg-gradient-purple">
+                <div>
+                    <h6 class="text-white-50 small mb-1">انواع اتاق‌های تعریف‌شده</h6>
+                    <h3 class="fw-bold mb-0">{{ rooms_count }} نوع اتاق</h3>
+                </div>
+                <i class="fa-solid fa-bed fa-2x text-white-50"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="manager-stat-card bg-gradient-green">
+                <div>
+                    <h6 class="text-white-50 small mb-1">رزروهای تأیید شده</h6>
+                    <h3 class="fw-bold mb-0">{{ active_bookings_count }} رزرو</h3>
+                </div>
+                <i class="fa-solid fa-calendar-check fa-2x text-white-50"></i>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="manager-stat-card bg-gradient-amber">
+                <div>
+                    <h6 class="text-white-50 small mb-1">مجموع درآمد رزروها</h6>
+                    <h4 class="fw-bold mb-0">{{ total_income|floatformat:0 }} تومان</h4>
+                </div>
+                <i class="fa-solid fa-wallet fa-2x text-white-50"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- نرخ اشغال اتاق‌های امروز و دسترسی سریع -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fa-solid fa-chart-pie text-primary ms-2"></i>
+                        وضعیت اشغال اتاق‌ها در تاریخ امروز ({{ today }})
+                    </h5>
+                    <a href="{% url 'bookings:manager_room_status' %}" class="btn btn-sm btn-outline-primary">
+                        مشاهده جزئیات کامل
+                    </a>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small fw-bold mb-1">
+                        <span>نرخ اشغال کل:</span>
+                        <span class="text-primary">{{ occupancy_rate }}%</span>
+                    </div>
+                    <div class="progress" style="height: 14px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ occupancy_rate }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="row g-2 text-center mt-2">
+                    <div class="col-4">
+                        <div class="p-2 border rounded-3 bg-light">
+                            <span class="d-block small text-muted">کل ظرفیت اتاق‌ها</span>
+                            <span class="fw-bold fs-5 text-dark">{{ total_rooms_capacity }}</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 border rounded-3 bg-danger-subtle text-danger">
+                            <span class="d-block small">اتاق‌های رزرو شده</span>
+                            <span class="fw-bold fs-5">{{ today_booked_count }}</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 border rounded-3 bg-success-subtle text-success">
+                            <span class="d-block small">اتاق‌های آزاد</span>
+                            <span class="fw-bold fs-5">{{ today_free_count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-3">
+                    <i class="fa-solid fa-bolt text-warning ms-2"></i>
+                    دسترسی و مدیریت سریع
+                </h5>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <a href="{% url 'bookings:manager_hotels' %}" class="btn btn-light border w-100 p-3 text-start rounded-3 h-100">
+                            <i class="fa-solid fa-hotel text-primary fa-lg mb-2 d-block"></i>
+                            <div class="fw-bold text-dark">مدیریت هتل‌ها</div>
+                            <small class="text-muted">مشاهده و ویرایش مشخصات هتل‌ها</small>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'bookings:manager_bookings' %}" class="btn btn-light border w-100 p-3 text-start rounded-3 h-100">
+                            <i class="fa-solid fa-list-check text-info fa-lg mb-2 d-block"></i>
+                            <div class="fw-bold text-dark">رزروهای انجام شده</div>
+                            <small class="text-muted">بررسی و فیلتر درخواست‌های رزرو</small>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'bookings:manager_room_status' %}" class="btn btn-light border w-100 p-3 text-start rounded-3 h-100">
+                            <i class="fa-solid fa-door-open text-warning fa-lg mb-2 d-block"></i>
+                            <div class="fw-bold text-dark">اتاق‌های رزروشده و آزاد</div>
+                            <small class="text-muted">کنترل لحظه‌ای ظرفیت اتاق‌ها</small>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="{% url 'bookings:manager_discounts' %}" class="btn btn-light border w-100 p-3 text-start rounded-3 h-100">
+                            <i class="fa-solid fa-tags text-danger fa-lg mb-2 d-block"></i>
+                            <div class="fw-bold text-dark">تعریف کد تخفیف</div>
+                            <small class="text-muted">ایجاد کدهای پروموشن و تخفیف</small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول آخرین رزروهای ثبت‌شده -->
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+            <h5 class="fw-bold mb-0">
+                <i class="fa-solid fa-clock-rotate-left text-primary ms-2"></i>
+                آخرین رزروهای ثبت‌شده
+            </h5>
+            <a href="{% url 'bookings:manager_bookings' %}" class="btn btn-sm btn-outline-primary">
+                مشاهده همه رزروها
+            </a>
+        </div>
+
+        {% if recent_bookings %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>کد رهگیری</th>
+                            <th>هتل و اتاق</th>
+                            <th>نام مهمان</th>
+                            <th>شماره تماس</th>
+                            <th>بازه اقامت</th>
+                            <th>مبلغ</th>
+                            <th>وضعیت</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in recent_bookings %}
+                            <tr>
+                                <td class="fw-bold text-primary">{{ b.tracking_code }}</td>
+                                <td>
+                                    <div class="fw-semibold">{{ b.room_type.hotel.name }}</div>
+                                    <small class="text-muted">{{ b.room_type.title }} ({{ b.rooms_count }} اتاق)</small>
+                                </td>
+                                <td>{{ b.guest_name }}</td>
+                                <td class="small">{{ b.guest_phone }}</td>
+                                <td class="small">{{ b.check_in }} تا {{ b.check_out }}</td>
+                                <td class="fw-bold text-success">{{ b.final_price|floatformat:0 }} تومان</td>
+                                <td>
+                                    {% if b.status == 'confirmed' %}
+                                        <span class="badge bg-success-subtle text-success">تأیید شده</span>
+                                    {% elif b.status == 'cancelled' %}
+                                        <span class="badge bg-danger-subtle text-danger">لغو شده</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-secondary">{{ b.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'bookings:booking_detail' b.tracking_code %}" class="btn btn-sm btn-outline-secondary">
+                                        جزئیات فاکتور
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4 text-muted">
+                هنوز رزروی برای هتل‌های شما ثبت نشده است.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

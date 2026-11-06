@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}وضعیت اتاق‌های رزروشده و آزاد | پنل مدیریت هتل{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'bookings:manager_dashboard' %}">داشبورد مدیر</a></li>
+            <li class="breadcrumb-item active">وضعیت اتاق‌های رزروشده و آزاد</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="fa-solid fa-door-open text-primary ms-2"></i>
+                مشاهده وضعیت اتاق‌های رزروشده و آزاد
+            </h4>
+            <p class="text-muted small mb-0">بررسی موجودی خالی، اتاق‌های اشغال شده و لیست مسافران مقیم در تاریخ انتخابی</p>
+        </div>
+    </div>
+
+    <!-- فرم انتخاب تاریخ -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-light">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label small fw-bold text-dark">
+                    <i class="fa-solid fa-calendar-day text-primary ms-1"></i> انتخاب تاریخ بررسی وضعیت اتاق‌ها:
+                </label>
+                <input type="date" name="date" value="{{ target_date }}" class="form-control form-control-lg fs-6">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary btn-lg w-100 fs-6 fw-bold">
+                    <i class="fa-solid fa-magnifying-glass ms-1"></i> مشاهده وضعیت در این روز
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- لیست اتاق‌ها و وضعیت آنها در این روز -->
+    <div class="row g-4">
+        {% for item in room_status_data %}
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h5 class="fw-bold mb-1">{{ item.room.title }}</h5>
+                            <span class="badge bg-secondary-subtle text-secondary">{{ item.hotel.name }} ({{ item.hotel.city }})</span>
+                        </div>
+                        <span class="badge bg-primary-subtle text-primary">
+                            {{ item.room.capacity }} نفره
+                        </span>
+                    </div>
+
+                    <!-- درصد اشغال -->
+                    <div class="my-3">
+                        <div class="d-flex justify-content-between small fw-bold mb-1">
+                            <span>درصد اشغال در تاریخ {{ target_date }}:</span>
+                            <span class="{% if item.occupancy_pct >= 100 %}text-danger{% elif item.occupancy_pct > 50 %}text-warning{% else %}text-success{% endif %}">
+                                {{ item.occupancy_pct }}%
+                            </span>
+                        </div>
+                        <div class="progress" style="height: 12px;">
+                            <div class="progress-bar {% if item.occupancy_pct >= 100 %}bg-danger{% elif item.occupancy_pct > 50 %}bg-warning{% else %}bg-success{% endif %}" 
+                                 role="progressbar" style="width: {{ item.occupancy_pct }}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- کارت‌های تعداد کل، پر و خالی -->
+                    <div class="row g-2 text-center mb-3">
+                        <div class="col-4">
+                            <div class="border rounded-3 p-2 bg-light">
+                                <span class="d-block small text-muted">موجودی کل</span>
+                                <b class="fs-5 text-dark">{{ item.total_rooms }}</b>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded-3 p-2 bg-danger-subtle text-danger">
+                                <span class="d-block small">رزرو شده (اشغال)</span>
+                                <b class="fs-5">{{ item.booked_count }}</b>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded-3 p-2 bg-success-subtle text-success">
+                                <span class="d-block small">اتاق آزاد</span>
+                                <b class="fs-5">{{ item.free_count }}</b>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- لیست مسافران مقیم -->
+                    <div class="border-top pt-3 mt-auto">
+                        <h6 class="small fw-bold text-muted mb-2">
+                            <i class="fa-solid fa-users text-primary ms-1"></i>
+                            مهمانان مقیم در این تاریخ ({{ item.active_bookings.count }} رزرو فعال):
+                        </h6>
+                        {% if item.active_bookings %}
+                            <div class="overflow-auto" style="max-height: 120px;">
+                                <ul class="list-group list-group-flush small">
+                                    {% for b in item.active_bookings %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1">
+                                            <div>
+                                                <b>{{ b.guest_name }}</b>
+                                                <span class="text-muted">({{ b.guest_phone }})</span>
+                                                <small class="badge bg-light text-muted border ms-1">{{ b.rooms_count }} اتاق</small>
+                                            </div>
+                                            <a href="{% url 'bookings:booking_detail' b.tracking_code %}" class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size: 0.75rem;">
+                                                واچر {{ b.tracking_code }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                            <p class="small text-muted mb-0">هیچ رزروی برای این تاریخ ثبت نشده است (تمامی اتاق‌ها آزاد هستند).</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5 text-muted">
+                اتاقی برای نمایش وجود ندارد. ابتدا هتل و اتاق‌های خود را تعریف کنید.
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}مدیریت کدهای تخفیف | پنل مدیریت هتل{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'bookings:manager_dashboard' %}">داشبورد مدیر</a></li>
+            <li class="breadcrumb-item active">کدهای تخفیف</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="fa-solid fa-tags text-primary ms-2"></i>
+                مدیریت و تعریف کدهای تخفیف
+            </h4>
+            <p class="text-muted small mb-0">ایجاد پروموشن، تخفیف درصدی و تعیین سقف و مهلت استفاده برای مشتریان</p>
+        </div>
+        <a href="{% url 'bookings:manager_discount_create' %}" class="btn btn-primary btn-sm px-3 rounded-pill">
+            <i class="fa-solid fa-plus ms-1"></i> تعریف کد تخفیف جدید
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                    <tr>
+                        <th>کد تخفیف</th>
+                        <th>هتل اختصاصی</th>
+                        <th>درصد تخفیف</th>
+                        <th>سقف تخفیف</th>
+                        <th>حداقل مبلغ سفارش</th>
+                        <th>بازه اعتبار</th>
+                        <th>دفعات استفاده</th>
+                        <th>وضعیت</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in discounts %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-light text-danger border font-monospace fs-6">
+                                    {{ d.code }}
+                                </span>
+                            </td>
+                            <td>{{ d.hotel.name|default:"تمامی هتل‌ها" }}</td>
+                            <td><b class="text-primary fs-6">{{ d.discount_percent }}%</b></td>
+                            <td class="small">
+                                {% if d.max_discount_amount %}
+                                    {{ d.max_discount_amount|floatformat:0 }} تومان
+                                {% else %}
+                                    <span class="text-muted">بدون سقف</span>
+                                {% endif %}
+                            </td>
+                            <td class="small">{{ d.min_order_amount|floatformat:0 }} تومان</td>
+                            <td class="small">
+                                <div>از: {{ d.valid_from }}</div>
+                                <div>تا: {{ d.valid_to }}</div>
+                            </td>
+                            <td class="small">
+                                <b>{{ d.times_used }}</b> از {{ d.max_uses }}
+                            </td>
+                            <td>
+                                {% if d.is_active %}
+                                    <span class="badge bg-success-subtle text-success py-1 px-2 rounded-pill">فعال</span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary py-1 px-2 rounded-pill">غیرفعال</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'bookings:manager_discount_toggle' d.id %}" class="btn btn-sm {% if d.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %} py-1 px-2">
+                                    {% if d.is_active %}غیرفعال‌سازی{% else %}فعال‌سازی{% endif %}
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                هنوز هیچ کد تخفیفی تعریف نکرده‌اید.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

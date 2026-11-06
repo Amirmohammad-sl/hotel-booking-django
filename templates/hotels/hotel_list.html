@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}جستجو و لیست هتل‌ها | آسایش هتل{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <!-- Breadcrumb & Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="fa-solid fa-hotel text-primary ms-2"></i>هتل‌های موجود</h4>
+            <p class="text-muted small mb-0">نتایج جستجو بر اساس شهر، تاریخ اقامت و ظرفیت درخواستی</p>
+        </div>
+        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fs-6">
+            {{ total_found }} هتل یافت شد
+        </span>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sidebar فیلترها -->
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 85px;">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">
+                    <i class="fa-solid fa-filter text-primary ms-1"></i> فیلتر نتایج
+                </h5>
+
+                <form method="get" action="{% url 'hotels:hotel_list' %}">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">شهر مقصد یا نام هتل</label>
+                        <input type="text" name="city" value="{{ city }}" class="form-control form-control-sm" placeholder="مثلاً: کیش، مشهد، اصفهان">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">تاریخ ورود</label>
+                        <input type="date" name="check_in" value="{{ check_in }}" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">تاریخ خروج</label>
+                        <input type="date" name="check_out" value="{{ check_out }}" class="form-control form-control-sm">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">حداقل ظرفیت نفرات</label>
+                        <select name="capacity" class="form-select form-select-sm">
+                            <option value="1" {% if capacity == 1 %}selected{% endif %}>۱ نفر</option>
+                            <option value="2" {% if capacity == 2 %}selected{% endif %}>۲ نفر</option>
+                            <option value="3" {% if capacity == 3 %}selected{% endif %}>۳ نفر</option>
+                            <option value="4" {% if capacity == 4 %}selected{% endif %}>۴ نفر</option>
+                            <option value="5" {% if capacity == 5 %}selected{% endif %}>۵ نفر به بالا</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">درجه هتل (ستاره)</label>
+                        <select name="stars" class="form-select form-select-sm">
+                            <option value="">همه هتل‌ها</option>
+                            <option value="5" {% if stars == '5' %}selected{% endif %}>۵ ستاره ⭐⭐⭐⭐⭐</option>
+                            <option value="4" {% if stars == '4' %}selected{% endif %}>۴ ستاره ⭐⭐⭐⭐</option>
+                            <option value="3" {% if stars == '3' %}selected{% endif %}>۳ ستاره ⭐⭐⭐</option>
+                            <option value="2" {% if stars == '2' %}selected{% endif %}>۲ ستاره ⭐⭐</option>
+                            <option value="1" {% if stars == '1' %}selected{% endif %}>۱ ستاره ⭐</option>
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <label class="form-label small fw-semibold">بازه قیمت هر شب (تومان)</label>
+                        <div class="col-6">
+                            <input type="number" name="min_price" value="{{ min_price }}" class="form-control form-control-sm" placeholder="از">
+                        </div>
+                        <div class="col-6">
+                            <input type="number" name="max_price" value="{{ max_price }}" class="form-control form-control-sm" placeholder="تا">
+                        </div>
+                    </div>
+
+                    {% if all_amenities %}
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold mb-2">امکانات رفاهی</label>
+                            <div class="overflow-auto" style="max-height: 140px;">
+                                {% for a in all_amenities %}
+                                    <div class="form-check small mb-1">
+                                        <input class="form-check-input" type="checkbox" name="amenities" value="{{ a.id }}" id="amenity_{{ a.id }}" {% if a.id in selected_amenities %}checked{% endif %}>
+                                        <label class="form-check-label" for="amenity_{{ a.id }}">
+                                            <i class="{{ a.icon }} ms-1 text-muted"></i> {{ a.name }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm py-2 fw-bold">
+                            <i class="fa-solid fa-magnifying-glass ms-1"></i> اعمال فیلترها
+                        </button>
+                        <a href="{% url 'hotels:hotel_list' %}" class="btn btn-outline-secondary btn-sm py-1">
+                            پاک کردن فیلترها
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- لیست هتل‌ها -->
+        <div class="col-lg-9">
+            <div class="row g-4">
+                {% for hotel in hotels %}
+                    <div class="col-md-6 col-xl-4">
+                        <div class="hotel-card">
+                            <div class="card-img-container">
+                                {% if hotel.image %}
+                                    <img src="{{ hotel.image.url }}" alt="{{ hotel.name }}">
+                                {% else %}
+                                    <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80" alt="{{ hotel.name }}">
+                                {% endif %}
+                                <div class="stars-badge">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= hotel.stars %}
+                                            <i class="fa-solid fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="p-3 d-flex flex-column flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h5 class="fw-bold fs-6 mb-0">{{ hotel.name }}</h5>
+                                    <span class="badge bg-secondary-subtle text-secondary">{{ hotel.city }}</span>
+                                </div>
+                                
+                                <div class="small text-muted mb-2">
+                                    <i class="fa-solid fa-star text-warning ms-1"></i>
+                                    {{ hotel.average_rating }} از ۵ ({{ hotel.reviews_count }} نظر)
+                                </div>
+
+                                <p class="text-muted small text-truncate mb-2">
+                                    <i class="fa-solid fa-location-dot text-danger ms-1"></i> {{ hotel.address }}
+                                </p>
+
+                                {% if check_in and check_out %}
+                                    <div class="mb-3">
+                                        <span class="badge bg-success-subtle text-success small">
+                                            <i class="fa-solid fa-check ms-1"></i>
+                                            {{ hotel.matched_rooms_count }} نوع اتاق آماده رزرو در این تاریخ
+                                        </span>
+                                    </div>
+                                {% endif %}
+
+                                <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-muted d-block" style="font-size: 0.75rem;">شروع هر شب از:</small>
+                                        <span class="price-tag fs-6">{{ hotel.calculated_min_price|floatformat:0 }} تومان</span>
+                                    </div>
+                                    <a href="{% url 'hotels:hotel_detail' hotel.id %}?check_in={{ check_in }}&check_out={{ check_out }}&capacity={{ capacity }}" class="btn btn-primary btn-sm px-3 rounded-pill">
+                                        انتخاب اتاق
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm rounded-4 p-5 text-center text-muted">
+                            <i class="fa-solid fa-hotel fa-4x text-secondary opacity-50 mb-3"></i>
+                            <h5 class="fw-bold">متأسفانه هتلی با مشخصات درخواستی شما یافت نشد!</h5>
+                            <p class="small text-secondary mb-4">می‌توانید فیلترهای جستجو مانند تاریخ، شهر یا بازه قیمت را تغییر دهید تا نتایج بیشتری مشاهده کنید.</p>
+                            <div>
+                                <a href="{% url 'hotels:hotel_list' %}" class="btn btn-primary px-4 rounded-pill">
+                                    مشاهده تمامی هتل‌ها
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

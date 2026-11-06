@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ room.title }} - {{ hotel.name }} | جزئیات اتاق و تقویم وضعیت{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'hotels:home' %}">صفحه اصلی</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'hotels:hotel_detail' hotel.id %}">{{ hotel.name }}</a></li>
+            <li class="breadcrumb-item active">{{ room.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Room Info Column -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                {% if room.image %}
+                    <img src="{{ room.image.url }}" alt="{{ room.title }}" class="w-100" style="height: 250px; object-fit: cover;">
+                {% else %}
+                    <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80" alt="{{ room.title }}" class="w-100" style="height: 250px; object-fit: cover;">
+                {% endif %}
+
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4 class="fw-bold mb-0">{{ room.title }}</h4>
+                        <span class="badge bg-primary-subtle text-primary fs-6">{{ hotel.name }}</span>
+                    </div>
+
+                    <div class="mb-3 text-muted small">
+                        <i class="fa-solid fa-users text-primary ms-1"></i> ظرفیت استاندارد: <b>{{ room.capacity }} نفر</b>
+                        <span class="mx-2">|</span>
+                        <i class="fa-solid fa-door-closed text-secondary ms-1"></i> موجودی کل: <b>{{ room.total_rooms }} اتاق</b>
+                    </div>
+
+                    <p class="text-secondary small leading-relaxed mb-4">
+                        {{ room.description|default:"اتاقی مجهز با امکانات کامل رفاهی، حمام اختصاصی، سیستم سرمایش و گرمایش، اینترنت وای‌فای پرسرعت و چشم‌انداز دلپذیر." }}
+                    </p>
+
+                    <h6 class="fw-bold small mb-2">امکانات و خدمات اتاق:</h6>
+                    <div class="mb-4">
+                        {% for a in room.amenities.all %}
+                            <span class="badge bg-light text-dark border p-2 me-1 mb-1 small">
+                                <i class="{{ a.icon }} text-primary ms-1"></i> {{ a.name }}
+                            </span>
+                        {% empty %}
+                            <span class="text-muted small">امکانات استاندارد هتل</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="card bg-light border-0 p-3 rounded-3 mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">هزینه هر شب اقامت:</span>
+                            <span class="price-tag fs-5">{{ room.price_per_night|floatformat:0 }} تومان</span>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'bookings:book_room' room.id %}" class="btn btn-primary w-100 py-2 fw-bold rounded-pill">
+                        <i class="fa-solid fa-calendar-check ms-1"></i> اقدام به رزرو این اتاق
+                    </a>
+                    <a href="{% url 'hotels:home' %}#room-3d-canvas-container" class="btn btn-outline-secondary w-100 py-2 fw-semibold rounded-pill mt-2 small">
+                        <i class="fa-solid fa-cube text-warning ms-1"></i> شبیه‌ساز و تور سه‌بعدی اتاق (3D)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Column (Bonus Feature: نمایش وضعیت اتاق‌ها در تقویم) -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                    <div>
+                        <h5 class="fw-bold mb-1">
+                            <i class="fa-regular fa-calendar-days text-primary ms-2"></i>
+                            تقویم ظرفیت و وضعیت اتاق در ۳۰ روز آینده
+                        </h5>
+                        <p class="text-muted small mb-0">وضعیت آزاد بودن یا تکمیل ظرفیت این نوع اتاق را در روزهای مختلف مشاهده نمایید</p>
+                    </div>
+                </div>
+
+                <!-- Legend راهنما -->
+                <div class="d-flex gap-3 mb-3 small">
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="d-inline-block rounded-circle bg-success" style="width: 12px; height: 12px;"></span>
+                        <span>اتاق آزاد جهت رزرو</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="d-inline-block rounded-circle bg-danger" style="width: 12px; height: 12px;"></span>
+                        <span>تکمیل ظرفیت</span>
+                    </div>
+                </div>
+
+                <!-- Calendar Grid -->
+                <div class="calendar-grid">
+                    {% for day in calendar_days %}
+                        <div class="calendar-day-box {% if day.is_available %}available{% else %}full{% endif %}">
+                            <div class="day-number">{{ day.day_num }}</div>
+                            <div style="font-size: 0.7rem;" class="text-muted">{{ day.date|slice:"5:" }}</div>
+                            <div class="day-status fw-bold">
+                                {% if day.is_available %}
+                                    <span class="badge bg-success-subtle text-success p-1" style="font-size: 0.65rem;">
+                                        {{ day.free_count }} آزاد
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger-subtle text-danger p-1" style="font-size: 0.65rem;">
+                                        تکمیل
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="card bg-info-subtle border-0 p-3 rounded-3 mt-4">
+                    <div class="d-flex gap-2">
+                        <i class="fa-solid fa-circle-info text-info mt-1"></i>
+                        <div class="small text-info-emphasis">
+                            <b>نکته:</b> تاریخ‌های سبز رنگ دارای ظرفیت خالی می‌باشند. برای رزرو، روی دکمه «اقدام به رزرو» کلیک کنید و تاریخ‌های دلخواه خود را تعیین فرمایید.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

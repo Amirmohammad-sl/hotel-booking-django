@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}آسایش هتل | سامانه هوشمند و ۳ بعدی رزرو آنلاین هتل{% endblock %}
+
+{% block content %}
+<!-- 3D Interactive Hero Section -->
+<div class="hero-section-3d">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <!-- Hero Copy -->
+            <div class="col-lg-6 text-center text-lg-start">
+                <div class="mb-3">
+                    <span class="hero-3d-badge">
+                        <span class="pulse-dot"></span>
+                        <i class="fa-solid fa-cube text-warning ms-1"></i>
+                        سامانه هوشمند اقامتی با موتور گرافیکی ۳ بعدی
+                    </span>
+                </div>
+                <h1 class="display-4 fw-extrabold mb-3 text-white" style="line-height: 1.3;">
+                    اقامتی رؤیایی و لوکس در <span style="background: linear-gradient(135deg, #fef08a, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">برترین هتل‌های ایران</span>
+                </h1>
+                <p class="lead mb-4 text-light opacity-80" style="font-size: 1.1rem; line-height: 1.8;">
+                    تجربه مدرن انتخاب اتاق با تور مجازی سه‌بعدی، مشاهده وضعیت بلادرنگ ظرفیت اتاق‌ها در تقویم و رزرو بدون واسطه با تضمین بهترین قیمت.
+                </p>
+                <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-lg-start">
+                    <span class="badge bg-white bg-opacity-10 text-light border border-white border-opacity-20 px-3 py-2 rounded-pill small">
+                        <i class="fa-solid fa-shield-halved text-success ms-1"></i> رزرو ۱۰۰٪ قطعی و آنی
+                    </span>
+                    <span class="badge bg-white bg-opacity-10 text-light border border-white border-opacity-20 px-3 py-2 rounded-pill small">
+                        <i class="fa-solid fa-tags text-warning ms-1"></i> تخفیف‌های استثنایی
+                    </span>
+                    <span class="badge bg-white bg-opacity-10 text-light border border-white border-opacity-20 px-3 py-2 rounded-pill small">
+                        <i class="fa-solid fa-glasses text-info ms-1"></i> تور بصری و سه‌بعدی
+                    </span>
+                </div>
+            </div>
+
+            <!-- Hero 3D WebGL Canvas -->
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <div id="hero-3d-container"></div>
+                    <div class="text-center mt-2 small text-white-50">
+                        <i class="fa-solid fa-arrows-spin ms-1 text-warning"></i>
+                        <span>ماوس را حرکت دهید یا کلیک کرده و مدل سه‌بعدی را بچرخانید</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Glass Search Card with 3D Tilt Physics -->
+<div class="container">
+    <div class="hero-search-card">
+        <form action="{% url 'hotels:hotel_list' %}" method="get">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-bold text-muted">
+                        <i class="fa-solid fa-location-dot text-danger ms-1"></i>شهر مقصد یا نام هتل
+                    </label>
+                    <input type="text" name="city" class="form-control form-control-lg fs-6" placeholder="مثلاً: تهران، کیش، مشهد، اصفهان..." list="citiesList">
+                    <datalist id="citiesList">
+                        {% for c in cities %}
+                            <option value="{{ c }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-bold text-muted">
+                        <i class="fa-solid fa-calendar-check text-primary ms-1"></i>تاریخ ورود
+                    </label>
+                    <input type="date" name="check_in" class="form-control form-control-lg fs-6" value="{{ today }}">
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small fw-bold text-muted">
+                        <i class="fa-solid fa-calendar-xmark text-warning ms-1"></i>تاریخ خروج
+                    </label>
+                    <input type="date" name="check_out" class="form-control form-control-lg fs-6" value="{{ tomorrow }}">
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <label class="form-label small fw-bold text-muted">
+                        <i class="fa-solid fa-user-group text-info ms-1"></i>تعداد نفرات
+                    </label>
+                    <select name="capacity" class="form-select form-select-lg fs-6">
+                        <option value="1">۱ نفر</option>
+                        <option value="2" selected>۲ نفر</option>
+                        <option value="3">۳ نفر</option>
+                        <option value="4">۴ نفر</option>
+                        <option value="5">۵ نفر به بالا</option>
+                    </select>
+                </div>
+                <div class="col-lg-1 col-md-2">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-2 fs-6 fw-bold" title="جستجو">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- بخش ویژه: تور مجازی سه‌بعدی و نمایش تعاملی سوئیت هتل (3D Virtual Suite Explorer) -->
+<div class="container">
+    <div class="suite-3d-showcase-section">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-5">
+                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-3">
+                    <i class="fa-solid fa-cube ms-1"></i> فناوری وب‌جی‌ال (Three.js 3D)
+                </span>
+                <h3 class="fw-bold mb-3 text-white">
+                    تور مجازی سه‌بعدی سوئیت لوکس
+                </h3>
+                <p class="text-light opacity-80 small leading-relaxed mb-4">
+                    پیش از رزرو نهایی، اتاق خود را در فضای سه‌بعدی و ۳۶۰ درجه به صورت زنده بررسی کنید! با ماوس مدل را بچرخانید، زوم کنید و حتی نورپردازی روز و شب هتل را شبیه‌سازی نمایید.
+                </p>
+
+                <div class="row g-2 mb-4">
+                    <div class="col-6">
+                        <div class="feature-3d-card p-2 text-center">
+                            <i class="fa-solid fa-bed text-warning fs-5 mb-1 d-block"></i>
+                            <span class="small fw-bold">تخت کینگ سایز رویال</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="feature-3d-card p-2 text-center">
+                            <i class="fa-solid fa-panorama text-info fs-5 mb-1 d-block"></i>
+                            <span class="small fw-bold">چشم‌انداز پانوراما</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="feature-3d-card p-2 text-center">
+                            <i class="fa-solid fa-lightbulb text-warning fs-5 mb-1 d-block"></i>
+                            <span class="small fw-bold">نورپردازی هوشمند</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="feature-3d-card p-2 text-center">
+                            <i class="fa-solid fa-couch text-success fs-5 mb-1 d-block"></i>
+                            <span class="small fw-bold">مبلمان ارگونومیک</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="button" id="btn-toggle-night" onclick="toggleRoom3DLighting()" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2">
+                        <i class="fa-solid fa-moon text-info ms-1"></i> تغییر به حالت شب (Night Mode)
+                    </button>
+                    <button type="button" onclick="resetRoom3DView()" class="btn btn-outline-secondary text-light btn-sm rounded-pill px-3 py-2">
+                        <i class="fa-solid fa-rotate-left ms-1"></i> زاویه پیش‌فرض
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3D Room WebGL Viewer -->
+            <div class="col-lg-7">
+                <div class="position-relative">
+                    <div id="room-3d-canvas-container"></div>
+                    <div class="suite-3d-controls">
+                        <span class="badge bg-dark bg-opacity-75 text-light small px-3 py-2 border border-white border-opacity-10">
+                            <i class="fa-solid fa-hand-pointer text-warning ms-1"></i> کلیک و درگ کنید تا ۳۶۰ درجه بچرخید
+                        </span>
+                        <span class="badge bg-primary px-3 py-2 small">
+                            ۳D Real-Time
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- بخش پیشنهادات هوشمند هتل -->
+<div class="container mt-4 pt-2">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="fa-solid fa-wand-magic-sparkles text-warning ms-2"></i>
+                پیشنهاد هوشمند هتل
+            </h4>
+            <p class="text-muted small mb-0">
+                {% if user.is_authenticated and user.favorite_city %}
+                    پیشنهادهای اختصاصی برای شما بر اساس شهر مورد علاقه ({{ user.favorite_city }}) و بودجه دلخواهتان
+                {% else %}
+                    بهترین و محبوب‌ترین گزینه‌های اقامتی منتخب مسافران
+                {% endif %}
+            </p>
+        </div>
+        {% if user.is_authenticated %}
+            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="fa-solid fa-sliders ms-1"></i> تنظیم ترجیحات
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="row g-4">
+        {% for hotel in recommendations %}
+            <div class="col-lg-3 col-md-6">
+                <div class="hotel-card">
+                    <div class="card-img-container">
+                        {% if hotel.image %}
+                            <img src="{{ hotel.image.url }}" alt="{{ hotel.name }}">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80" alt="{{ hotel.name }}">
+                        {% endif %}
+                        <div class="stars-badge">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= hotel.stars %}
+                                    <i class="fa-solid fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="p-3 d-flex flex-column flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="fw-bold fs-6 mb-0">{{ hotel.name }}</h5>
+                            <span class="badge bg-secondary-subtle text-secondary">{{ hotel.city }}</span>
+                        </div>
+                        <p class="text-muted small text-truncate mb-3">{{ hotel.address }}</p>
+                        <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">شروع قیمت هر شب از:</small>
+                                <span class="price-tag fs-6">{{ hotel.min_price|floatformat:0 }} تومان</span>
+                            </div>
+                            <a href="{% url 'hotels:hotel_detail' hotel.id %}" class="btn btn-primary btn-sm px-3 rounded-pill">
+                                رزرو هتل
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-4 text-muted">
+                هنوز هتلی در سامانه ثبت نشده است.
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- بخش سایر هتل‌های برتر و منتخب -->
+<div class="container mt-5 pt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="fa-solid fa-crown text-warning ms-2"></i>هتل‌های برتر و منتخب</h4>
+            <p class="text-muted small mb-0">بالاترین کیفیت اقامت و بهترین امکانات رفاهی در سراسر کشور</p>
+        </div>
+        <a href="{% url 'hotels:hotel_list' %}" class="btn btn-outline-primary btn-sm px-3 rounded-pill">
+            مشاهده همه هتل‌ها <i class="fa-solid fa-arrow-left me-1"></i>
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {% for hotel in featured_hotels %}
+            <div class="col-lg-4 col-md-6">
+                <div class="hotel-card">
+                    <div class="card-img-container">
+                        {% if hotel.image %}
+                            <img src="{{ hotel.image.url }}" alt="{{ hotel.name }}">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80" alt="{{ hotel.name }}">
+                        {% endif %}
+                        <div class="stars-badge">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= hotel.stars %}
+                                    <i class="fa-solid fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="p-4 d-flex flex-column flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="fw-bold mb-0">{{ hotel.name }}</h5>
+                            <span class="badge bg-primary-subtle text-primary">{{ hotel.city }}</span>
+                        </div>
+                        <div class="small text-muted mb-2">
+                            <i class="fa-solid fa-star text-warning ms-1"></i>
+                            امتیاز مسافران: {{ hotel.average_rating }} از ۵ ({{ hotel.reviews_count }} نظر)
+                        </div>
+                        <p class="text-muted small mb-4" style="line-height: 1.6;">
+                            {{ hotel.description|truncatewords:20 }}
+                        </p>
+                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">هر شب از:</small>
+                                <span class="price-tag fs-5">{{ hotel.min_price|floatformat:0 }} تومان</span>
+                            </div>
+                            <a href="{% url 'hotels:hotel_detail' hotel.id %}" class="btn btn-primary px-3 rounded-pill">
+                                جزئیات و رزرو
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- مزایای کلیدی سامانه (Feature Cards with 3D Aesthetics) -->
+<div class="container mt-5 pt-4 mb-4">
+    <div class="row g-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
+                <div class="mb-3">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary" style="width: 58px; height: 58px; font-size: 1.4rem;">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </span>
+                </div>
+                <h6 class="fw-bold mb-2">مشاهده تقویم لحظه‌ای</h6>
+                <p class="text-muted small mb-0">بررسی روزهای پر و خالی ۳۰ روز آینده در تقویم هر اتاق پیش از ثبت رزرو</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
+                <div class="mb-3">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-warning-subtle text-warning" style="width: 58px; height: 58px; font-size: 1.4rem;">
+                        <i class="fa-solid fa-cube"></i>
+                    </span>
+                </div>
+                <h6 class="fw-bold mb-2">تور مجازی سه‌بعدی</h6>
+                <p class="text-muted small mb-0">بررسی طراحی داخلی و فضای اتاق‌ها با شبیه‌ساز سه‌بعدی WebGL</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
+                <div class="mb-3">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success-subtle text-success" style="width: 58px; height: 58px; font-size: 1.4rem;">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </span>
+                </div>
+                <h6 class="fw-bold mb-2">فرمول عدم تداخل رزروها</h6>
+                <p class="text-muted small mb-0">الگوریتم دقیق ریاضی جهت تضمین عدم بروز Overbooking در هتل</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center h-100 bg-white">
+                <div class="mb-3">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-info-subtle text-info" style="width: 58px; height: 58px; font-size: 1.4rem;">
+                        <i class="fa-solid fa-envelope-circle-check"></i>
+                    </span>
+                </div>
+                <h6 class="fw-bold mb-2">صدور واچر و پیامک تأیید</h6>
+                <p class="text-muted small mb-0">ارسال آنی پیامک و ایمیل با کد رهگیری اختصاصی و فاکتور چاپی</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

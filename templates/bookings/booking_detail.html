@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}فاکتور و تأییدیه رزرو {{ booking.tracking_code }} | آسایش هتل{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Action Bar (Print & Back) -->
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <div>
+            <a href="{% url 'bookings:my_bookings' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="fa-solid fa-arrow-right ms-1"></i> بازگشت به رزروهای من
+            </a>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-primary btn-sm btn-print px-3">
+                <i class="fa-solid fa-print ms-1"></i> چاپ فاکتور رسمی
+            </button>
+        </div>
+    </div>
+
+    <!-- فاکتور رسمی رزرو (Voucher) -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-4 bg-white" id="printableVoucher">
+        <div class="row align-items-center border-bottom pb-4 mb-4">
+            <div class="col-md-7">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-primary text-white rounded-circle p-3 d-inline-flex">
+                        <i class="fa-solid fa-hotel fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-1">واچر و رسید رسمی رزرو هتل</h4>
+                        <p class="text-muted small mb-0">سامانه جامع رزرواسیون هتل‌های کشور</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                <div class="small text-muted mb-1">کد رهگیری اختصاصی رزرو:</div>
+                <span class="badge bg-primary fs-5 px-3 py-2 rounded-3 font-monospace tracking-wide">
+                    {{ booking.tracking_code }}
+                </span>
+                <div class="small text-muted mt-1">زمان ثبت: {{ booking.created_at|date:"Y/m/d - H:i" }}</div>
+            </div>
+        </div>
+
+        <!-- وضعیت رزرو -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card bg-light border-0 p-3 rounded-3">
+                    <span class="text-muted small mb-1">وضعیت کنونی:</span>
+                    <span class="fw-bold">
+                        {% if booking.status == 'confirmed' %}
+                            <span class="text-success"><i class="fa-solid fa-circle-check ms-1"></i> قطعی و تأیید شده</span>
+                        {% elif booking.status == 'cancelled' %}
+                            <span class="text-danger"><i class="fa-solid fa-circle-xmark ms-1"></i> لغو شده</span>
+                        {% else %}
+                            <span class="text-secondary">{{ booking.get_status_display }}</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-light border-0 p-3 rounded-3">
+                    <span class="text-muted small mb-1">تاریخ ورود مسافر:</span>
+                    <span class="fw-bold text-dark"><i class="fa-solid fa-calendar-check text-primary ms-1"></i> {{ booking.check_in }} (ساعت ۱۴:۰۰)</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-light border-0 p-3 rounded-3">
+                    <span class="text-muted small mb-1">تاریخ خروج مسافر:</span>
+                    <span class="fw-bold text-dark"><i class="fa-solid fa-calendar-xmark text-warning ms-1"></i> {{ booking.check_out }} (ساعت ۱۲:۰۰)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- مشخصات هتل و اتاق -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card border p-3 rounded-3 h-100">
+                    <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">
+                        <i class="fa-solid fa-hotel ms-1"></i> مشخصات هتل
+                    </h6>
+                    <p class="mb-1"><b>نام هتل:</b> {{ booking.room_type.hotel.name }} ({{ booking.room_type.hotel.stars }} ستاره)</p>
+                    <p class="mb-1"><b>شهر:</b> {{ booking.room_type.hotel.city }}</p>
+                    <p class="mb-1"><b>آدرس:</b> {{ booking.room_type.hotel.address }}</p>
+                    <p class="mb-0"><b>تلفن پذیرش:</b> {{ booking.room_type.hotel.phone }}</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border p-3 rounded-3 h-100">
+                    <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">
+                        <i class="fa-solid fa-user-check ms-1"></i> مشخصات مهمان و اتاق
+                    </h6>
+                    <p class="mb-1"><b>نام مهمان اصلی:</b> {{ booking.guest_name }}</p>
+                    <p class="mb-1"><b>شماره موبایل:</b> {{ booking.guest_phone }}</p>
+                    <p class="mb-1"><b>نوع اتاق:</b> {{ booking.room_type.title }} (تعداد: {{ booking.rooms_count }} اتاق)</p>
+                    <p class="mb-0"><b>مدت اقامت:</b> {{ booking.nights_count }} شب</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- جزییات مالی -->
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>شرح</th>
+                        <th class="text-center">تعداد اتاق</th>
+                        <th class="text-center">تعداد شب</th>
+                        <th class="text-center">قیمت هر شب (تومان)</th>
+                        <th class="text-end">مبلغ کل (تومان)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>اقامت در {{ booking.room_type.title }}</td>
+                        <td class="text-center">{{ booking.rooms_count }}</td>
+                        <td class="text-center">{{ booking.nights_count }}</td>
+                        <td class="text-center">{{ booking.price_per_night|floatformat:0 }}</td>
+                        <td class="text-end fw-bold">{{ booking.total_price|floatformat:0 }}</td>
+                    </tr>
+                    {% if booking.discount_amount > 0 %}
+                        <tr class="table-success">
+                            <td colspan="4" class="text-success">
+                                <b>کد تخفیف اعمال شده:</b> {{ booking.discount_code.code|default:"تخفیف ویژه" }}
+                            </td>
+                            <td class="text-end text-success fw-bold">
+                                -{{ booking.discount_amount|floatformat:0 }}
+                            </td>
+                        </tr>
+                    {% endif %}
+                    <tr class="table-light fs-6">
+                        <td colspan="4" class="text-start fw-bold">مبلغ نهایی پرداخت شده:</td>
+                        <td class="text-end fw-bold text-primary fs-5">{{ booking.final_price|floatformat:0 }} تومان</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-secondary small mb-0">
+            <i class="fa-solid fa-circle-exclamation ms-1"></i>
+            <b>قوانین ورود:</b> ساعت تحویل اتاق ۱۴:۰۰ و ساعت تخلیه اتاق ۱۲:۰۰ ظهر می‌باشد. همراه داشتن کارت ملی و شناسنامه مسافران الزامی است.
+        </div>
+    </div>
+
+    <!-- بخش وضعیت ارسال ایمیل و پیامک تأیید رزرو (Bonus Feature) -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 no-print">
+        <h5 class="fw-bold mb-3 border-bottom pb-2">
+            <i class="fa-solid fa-bell text-warning ms-2"></i>
+            اطلاع‌رسانی تأیید رزرو (ارسال ایمیل و پیامک)
+        </h5>
+
+        <div class="row g-3">
+            {% for notif in notifications %}
+                <div class="col-md-6">
+                    <div class="card bg-light border-0 p-3 rounded-3 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge {% if notif.notification_type == 'email' %}bg-info{% else %}bg-success{% endif %}">
+                                {% if notif.notification_type == 'email' %}
+                                    <i class="fa-solid fa-envelope ms-1"></i> ایمیل تأیید
+                                {% else %}
+                                    <i class="fa-solid fa-comment-sms ms-1"></i> پیامک تأیید
+                                {% endif %}
+                            </span>
+                            <span class="text-success small fw-semibold">
+                                <i class="fa-solid fa-check-double ms-1"></i> ارسال موفق به {{ notif.recipient }}
+                            </span>
+                        </div>
+                        <div class="small text-muted mb-2">زمان ارسال: {{ notif.sent_at|date:"Y/m/d - H:i:s" }}</div>
+                        <div class="bg-white p-2 rounded border small text-secondary" style="white-space: pre-line; font-family: inherit;">
+                            {{ notif.message }}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-muted small">
+                    اعلان‌های مربوطه در سیستم ثبت گردیده‌اند.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+
+{% block title %}رزرو اتاق {{ room.title }} | آسایش هتل{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'hotels:home' %}">صفحه اصلی</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'hotels:hotel_detail' hotel.id %}">{{ hotel.name }}</a></li>
+            <li class="breadcrumb-item active">رزرو اتاق {{ room.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- فرم اطلاعات رزرو -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h4 class="fw-bold mb-3 border-bottom pb-2">
+                    <i class="fa-solid fa-file-signature text-primary ms-2"></i>
+                    اطلاعات رزرو و مسافر
+                </h4>
+
+                <form method="post" id="bookingForm" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-5">
+                            <label class="form-label small fw-semibold">تاریخ ورود به هتل</label>
+                            {{ form.check_in }}
+                            {% if form.check_in.errors %}
+                                <div class="text-danger small mt-1">{{ form.check_in.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small fw-semibold">تاریخ خروج از هتل</label>
+                            {{ form.check_out }}
+                            {% if form.check_out.errors %}
+                                <div class="text-danger small mt-1">{{ form.check_out.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-semibold">تعداد اتاق</label>
+                            {{ form.rooms_count }}
+                            {% if form.rooms_count.errors %}
+                                <div class="text-danger small mt-1">{{ form.rooms_count.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">نام و نام خانوادگی مهمان اصلی</label>
+                            {{ form.guest_name }}
+                            {% if form.guest_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.guest_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">شماره موبایل مهمان (جهت دریافت پیامک تأیید)</label>
+                            {{ form.guest_phone }}
+                            {% if form.guest_phone.errors %}
+                                <div class="text-danger small mt-1">{{ form.guest_phone.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">کد ملی مهمان (اختیاری)</label>
+                            {{ form.guest_national_id }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">درخواست‌های ویژه (اختیاری)</label>
+                            {{ form.special_requests }}
+                        </div>
+                    </div>
+
+                    <!-- بخش کد تخفیف -->
+                    <div class="card bg-light border-0 p-3 mb-4 rounded-3">
+                        <label class="form-label small fw-bold text-secondary mb-2">
+                            <i class="fa-solid fa-tags text-danger ms-1"></i>
+                            کد تخفیف دارید؟
+                        </label>
+                        <div class="input-group">
+                            {{ form.discount_code_input }}
+                            <button type="button" class="btn btn-outline-primary" id="btnApplyCoupon">
+                                بررسی و اعمال کد
+                            </button>
+                        </div>
+                        <div id="couponFeedback" class="small mt-2" style="display: none;"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-bold rounded-pill shadow-sm">
+                        <i class="fa-solid fa-lock ms-2"></i> تأیید نهایی و ثبت رزرو
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ستون خلاصه هزینه و فاکتور -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 85px;">
+                <h5 class="fw-bold mb-3 border-bottom pb-2">
+                    <i class="fa-solid fa-receipt text-primary ms-1"></i> خلاصه فاکتور رزرو
+                </h5>
+
+                <div class="mb-3">
+                    <div class="fw-bold fs-6">{{ hotel.name }}</div>
+                    <small class="text-muted">{{ hotel.city }} - {{ hotel.address }}</small>
+                </div>
+
+                <div class="card bg-light border-0 p-3 rounded-3 mb-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-muted">نوع اتاق:</span>
+                        <span class="fw-bold">{{ room.title }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-muted">ظرفیت:</span>
+                        <span>{{ room.capacity }} نفر</span>
+                    </div>
+                    <div class="d-flex justify-content-between small">
+                        <span class="text-muted">قیمت هر شب:</span>
+                        <span class="fw-bold text-primary">{{ room.price_per_night|floatformat:0 }} تومان</span>
+                    </div>
+                </div>
+
+                <ul class="list-group list-group-flush small mb-3">
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">تعداد شب اقامت:</span>
+                        <span id="displayNights" class="fw-bold">۱ شب</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">تعداد اتاق انتخابی:</span>
+                        <span id="displayRoomsCount" class="fw-bold">۱</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">مبلغ کل پایه:</span>
+                        <span id="displayBasePrice" class="fw-bold">{{ room.price_per_night|floatformat:0 }} تومان</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0 text-success" id="discountRow" style="display: none !important;">
+                        <span>تخفیف اعمال شده:</span>
+                        <span id="displayDiscountAmount" class="fw-bold">۰ تومان</span>
+                    </li>
+                </ul>
+
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                    <span class="fw-bold">مبلغ نهایی پرداختی:</span>
+                    <span id="displayFinalPrice" class="price-tag fs-5">{{ room.price_per_night|floatformat:0 }} تومان</span>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <small class="text-muted d-block">
+                        <i class="fa-solid fa-shield-halved text-success ms-1"></i>
+                        ارسال آنی پیامک و ایمیل تأیید رزرو پس از ثبت
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const checkInInput = document.getElementById("id_check_in");
+        const checkOutInput = document.getElementById("id_check_out");
+        const roomsCountInput = document.getElementById("id_rooms_count");
+        const couponInput = document.getElementById("id_discount_code_input");
+        const btnApplyCoupon = document.getElementById("btnApplyCoupon");
+        const couponFeedback = document.getElementById("couponFeedback");
+
+        const displayNights = document.getElementById("displayNights");
+        const displayRoomsCount = document.getElementById("displayRoomsCount");
+        const displayBasePrice = document.getElementById("displayBasePrice");
+        const displayDiscountAmount = document.getElementById("displayDiscountAmount");
+        const displayFinalPrice = document.getElementById("displayFinalPrice");
+        const discountRow = document.getElementById("discountRow");
+
+        const pricePerNight = {{ room.price_per_night }};
+        const roomId = {{ room.id }};
+        let currentDiscount = 0;
+
+        function updatePricing() {
+            const checkIn = new Date(checkInInput.value);
+            const checkOut = new Date(checkOutInput.value);
+            const rooms = parseInt(roomsCountInput.value) || 1;
+
+            let nights = 1;
+            if (checkIn && checkOut && checkOut > checkIn) {
+                const diffTime = Math.abs(checkOut - checkIn);
+                nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            }
+
+            displayNights.textContent = nights + " شب";
+            displayRoomsCount.textContent = rooms;
+
+            const baseTotal = nights * pricePerNight * rooms;
+            displayBasePrice.textContent = baseTotal.toLocaleString('fa-IR') + " تومان";
+
+            const finalTotal = Math.max(0, baseTotal - currentDiscount);
+            displayFinalPrice.textContent = finalTotal.toLocaleString('fa-IR') + " تومان";
+        }
+
+        checkInInput.addEventListener("change", updatePricing);
+        checkOutInput.addEventListener("change", updatePricing);
+        roomsCountInput.addEventListener("input", updatePricing);
+        updatePricing();
+
+        // بررسی کد تخفیف با Ajax
+        btnApplyCoupon.addEventListener("click", function () {
+            const code = couponInput.value.trim();
+            if (!code) {
+                couponFeedback.style.display = "block";
+                couponFeedback.className = "small mt-2 text-danger";
+                couponFeedback.textContent = "لطفاً کد تخفیف را وارد کنید.";
+                return;
+            }
+
+            btnApplyCoupon.disabled = true;
+            btnApplyCoupon.innerHTML = '<span class="spinner-border spinner-border-sm ms-1"></span> در حال بررسی...';
+
+            fetch("{% url 'bookings:apply_coupon_ajax' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    code: code,
+                    room_id: roomId,
+                    check_in: checkInInput.value,
+                    check_out: checkOutInput.value,
+                    rooms_count: roomsCountInput.value
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btnApplyCoupon.disabled = false;
+                btnApplyCoupon.textContent = "بررسی و اعمال کد";
+                couponFeedback.style.display = "block";
+
+                if (data.valid) {
+                    couponFeedback.className = "small mt-2 text-success fw-bold";
+                    couponFeedback.textContent = "✓ " + data.message;
+                    currentDiscount = data.discount_amount;
+                    discountRow.style.setProperty("display", "flex", "important");
+                    displayDiscountAmount.textContent = data.discount_amount_formatted;
+                    displayFinalPrice.textContent = data.final_price_formatted;
+                } else {
+                    couponFeedback.className = "small mt-2 text-danger";
+                    couponFeedback.textContent = "✗ " + data.message;
+                    currentDiscount = 0;
+                    discountRow.style.setProperty("display", "none", "important");
+                    updatePricing();
+                }
+            })
+            .catch(err => {
+                btnApplyCoupon.disabled = false;
+                btnApplyCoupon.textContent = "بررسی و اعمال کد";
+                couponFeedback.style.display = "block";
+                couponFeedback.className = "small mt-2 text-danger";
+                couponFeedback.textContent = "خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.";
+            });
+        });
+    });
+</script>
+{% endblock %}

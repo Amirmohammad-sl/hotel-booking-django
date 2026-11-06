@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} | پنل مدیریت هتل{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'bookings:manager_dashboard' %}">داشبورد مدیر</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'bookings:manager_hotels' %}">هتل‌های من</a></li>
+            <li class="breadcrumb-item active">{{ title }}</li>
+        </ol>
+    </nav>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+        <h4 class="fw-bold mb-4 border-bottom pb-3">
+            <i class="fa-solid fa-hotel text-primary ms-2"></i> {{ title }}
+        </h4>
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">نام هتل</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">شهر</label>
+                    {{ form.city }}
+                    {% if form.city.errors %}<div class="text-danger small">{{ form.city.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">درجه (تعداد ستاره)</label>
+                    {{ form.stars }}
+                    {% if form.stars.errors %}<div class="text-danger small">{{ form.stars.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">آدرس دقیق هتل</label>
+                {{ form.address }}
+                {% if form.address.errors %}<div class="text-danger small">{{ form.address.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">شماره تماس پذیرش</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}<div class="text-danger small">{{ form.phone.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">ایمیل هتل (جهت دریافت اطلاعات)</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">توضیحات و معرفی هتل</label>
+                {{ form.description }}
+                {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label small fw-semibold">تصویر شاخص هتل</label>
+                {{ form.image }}
+                {% if form.image.errors %}<div class="text-danger small">{{ form.image.errors.0 }}</div>{% endif %}
+            </div>
+
+            <!-- Hidden coordinates fields (preserved for backend compatibility) -->
+            <div class="d-none">
+                {{ form.latitude }}
+                {{ form.longitude }}
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary px-4 py-2 fw-bold rounded-pill">
+                    <i class="fa-solid fa-floppy-disk ms-1"></i> ذخیره اطلاعات هتل
+                </button>
+                <a href="{% url 'bookings:manager_hotels' %}" class="btn btn-outline-secondary px-4 py-2 rounded-pill">
+                    انصراف
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+
