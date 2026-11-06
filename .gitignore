@@ -46,3 +46,8 @@ desktop.ini
 # Scratch and Antigravity logs
 scratch/
 .system_generated/
+
+# Frontend Node modules and build
+frontend/node_modules/
+frontend/dist/
+
