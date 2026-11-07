@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load jalali_tags %}
 
 {% block title %}فاکتور و تأییدیه رزرو {{ booking.tracking_code }} | آسایش هتل{% endblock %}
 
@@ -37,7 +38,7 @@
                 <span class="badge bg-primary fs-5 px-3 py-2 rounded-3 font-monospace tracking-wide">
                     {{ booking.tracking_code }}
                 </span>
-                <div class="small text-muted mt-1">زمان ثبت: {{ booking.created_at|date:"Y/m/d - H:i" }}</div>
+                <div class="small text-muted mt-1">زمان ثبت: {{ booking.created_at|jalali_datetime }}</div>
             </div>
         </div>
 
@@ -60,13 +61,13 @@
             <div class="col-md-4">
                 <div class="card bg-light border-0 p-3 rounded-3">
                     <span class="text-muted small mb-1">تاریخ ورود مسافر:</span>
-                    <span class="fw-bold text-dark"><i class="fa-solid fa-calendar-check text-primary ms-1"></i> {{ booking.check_in }} (ساعت ۱۴:۰۰)</span>
+                    <span class="fw-bold text-dark"><i class="fa-solid fa-calendar-check text-primary ms-1"></i> {{ booking.check_in|to_jalali }} (ساعت ۱۴:۰۰)</span>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card bg-light border-0 p-3 rounded-3">
                     <span class="text-muted small mb-1">تاریخ خروج مسافر:</span>
-                    <span class="fw-bold text-dark"><i class="fa-solid fa-calendar-xmark text-warning ms-1"></i> {{ booking.check_out }} (ساعت ۱۲:۰۰)</span>
+                    <span class="fw-bold text-dark"><i class="fa-solid fa-calendar-xmark text-warning ms-1"></i> {{ booking.check_out|to_jalali }} (ساعت ۱۲:۰۰)</span>
                 </div>
             </div>
         </div>
@@ -164,7 +165,7 @@
                                 <i class="fa-solid fa-check-double ms-1"></i> ارسال موفق به {{ notif.recipient }}
                             </span>
                         </div>
-                        <div class="small text-muted mb-2">زمان ارسال: {{ notif.sent_at|date:"Y/m/d - H:i:s" }}</div>
+                        <div class="small text-muted mb-2">زمان ارسال: {{ notif.sent_at|jalali_datetime }}</div>
                         <div class="bg-white p-2 rounded border small text-secondary" style="white-space: pre-line; font-family: inherit;">
                             {{ notif.message }}
                         </div>

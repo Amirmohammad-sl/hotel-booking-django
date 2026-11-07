@@ -9,20 +9,17 @@ def register_view(request):
     if request.user.is_authenticated:
         return redirect('hotels:home')
     
-    initial_role = request.GET.get('role', 'customer')
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, f"خوش آمدید {user.display_name}! حساب کاربری شما با موفقیت ایجاد شد.")
-            if user.is_hotel_manager:
-                return redirect('bookings:manager_dashboard')
+            messages.success(request, f"خوش آمدید {user.display_name}! حساب کاربری مسافری شما با موفقیت ایجاد شد.")
             return redirect('hotels:home')
     else:
-        form = UserRegistrationForm(initial={'role': initial_role})
+        form = UserRegistrationForm()
         
-    return render(request, 'accounts/register.html', {'form': form, 'role': initial_role})
+    return render(request, 'accounts/register.html', {'form': form})
 
 
 def login_view(request):

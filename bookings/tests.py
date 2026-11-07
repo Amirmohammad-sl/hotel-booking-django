@@ -154,3 +154,62 @@ class HotelBookingSystemTests(TestCase):
         self.assertIsNotNone(email_log)
         self.assertIsNotNone(sms_log)
         self.assertTrue(email_log.is_successful)
+
+    def test_customer_registration_only(self):
+        # تست اینکه ثبت نام عمومی فقط کاربر مسافر می‌سازد و نقش مدیر نمی‌پذیرد
+        reg_url = reverse('accounts:register')
+        res = self.client.get(reg_url)
+        self.assertEqual(res.status_code, 200)
+        self.assertNotContains(res, 'مدیر هتل امکان تعریف هتل')
+
+        # حتی اگر فیلد role ارسال شود، نقش مسافر ذخیره می‌شود
+        post_data = {
+            'username': 'new_user_traveler',
+            'first_name': 'مهمان',
+            'last_name': 'جدید',
+            'email': 'traveler@gmail.com',
+            'phone': '09129998877',
+            'role': 'manager',
+            'password': 'password123',
+            'confirm_password': 'password123',
+        }
+        res_post = self.client.post(reg_url, post_data)
+        self.assertEqual(res_post.status_code, 302)
+        created_user = User.objects.get(username='new_user_traveler')
+        self.assertEqual(created_user.role, 'customer')
+        self.assertFalse(created_user.is_hotel_manager)
+
+    def test_jalali_date_conversion_and_search(self):
+        from bookings.jalali import parse_flexible_date, gregorian_to_jalali
+        g_date = date(2024, 11, 5)
+        j_str = gregorian_to_jalali(g_date)
+        self.assertEqual(j_str, '1403/08/15')
+
+        # پارس تاریخ شمسی
+        parsed = parse_flexible_date('1403/08/15')
+        self.assertEqual(parsed, g_date)
+
+        # جستجوی هتل با تاریخ شمسی
+        url = reverse('hotels:hotel_list')
+        res = self.client.get(url, {
+            'city': 'اصفهان',
+            'check_in': '1403/08/15',
+            'check_out': '1403/08/17',
+            'capacity': 2
+        })
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'هتل آزمایشی پارسیان')
+
+    def test_first_visit_coupon_and_bell_notification(self):
+        # کاربر ناشناس (خارج از حساب) نباید زنگوله اعلان را ببیند
+        res_guest = self.client.get(reverse('hotels:home'))
+        self.assertEqual(res_guest.status_code, 200)
+        self.assertNotContains(res_guest, 'id="notificationBell"')
+
+        # وقتی کاربر مسافر وارد حساب شد، زنگوله و کد تخفیف را مشاهده می‌کند
+        self.client.login(username='test_customer', password='password123')
+        res_logged_in = self.client.get(reverse('hotels:home'))
+        self.assertEqual(res_logged_in.status_code, 200)
+        self.assertContains(res_logged_in, 'id="notificationBell"')
+        self.assertContains(res_logged_in, 'id="notificationBadge"')
+        self.assertContains(res_logged_in, 'FIRST20')

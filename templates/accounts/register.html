@@ -11,21 +11,12 @@
                     <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex p-3 mb-2">
                         <i class="fa-solid fa-user-plus fa-2x"></i>
                     </div>
-                    <h4 class="fw-bold">ثبت‌نام در سامانه هتل</h4>
-                    <p class="text-muted small">اطلاعات خود را جهت ساخت حساب کاربری وارد کنید</p>
+                    <h4 class="fw-bold">ثبت‌نام مسافر در سامانه</h4>
+                    <p class="text-muted small">اطلاعات خود را جهت ساخت حساب کاربری مسافر و دریافت تخفیف‌های ویژه وارد کنید</p>
                 </div>
 
                 <form method="post" novalidate>
                     {% csrf_token %}
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-primary">نوع حساب کاربری</label>
-                        {{ form.role }}
-                        <div class="form-text small">مدیر هتل امکان تعریف هتل، اتاق‌ها و مشاهده وضعیت رزروها را خواهد داشت.</div>
-                        {% if form.role.errors %}
-                            <div class="text-danger small mt-1">{{ form.role.errors.0 }}</div>
-                        {% endif %}
-                    </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">

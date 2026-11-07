@@ -54,12 +54,12 @@
 
             <div class="row g-3 mb-4">
                 <div class="col-md-4">
-                    <label class="form-label small fw-semibold">تاریخ شروع اعتبار</label>
+                    <label class="form-label small fw-semibold">تاریخ شروع اعتبار (شمسی)</label>
                     {{ form.valid_from }}
                     {% if form.valid_from.errors %}<div class="text-danger small">{{ form.valid_from.errors.0 }}</div>{% endif %}
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label small fw-semibold">تاریخ پایان اعتبار</label>
+                    <label class="form-label small fw-semibold">تاریخ پایان اعتبار (شمسی)</label>
                     {{ form.valid_to }}
                     {% if form.valid_to.errors %}<div class="text-danger small">{{ form.valid_to.errors.0 }}</div>{% endif %}
                 </div>

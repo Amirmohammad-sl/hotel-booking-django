@@ -18,7 +18,7 @@ class UserRegistrationForm(forms.ModelForm):
         model = User
         fields = [
             'username', 'first_name', 'last_name', 'email', 'phone', 
-            'role', 'favorite_city', 'preferred_min_price', 'preferred_max_price'
+            'favorite_city', 'preferred_min_price', 'preferred_max_price'
         ]
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام کاربری به انگلیسی'}),
@@ -26,7 +26,6 @@ class UserRegistrationForm(forms.ModelForm):
             'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام خانوادگی'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'example@domain.com'}),
             'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '۰۹۱۲۰۰۰۰۰۰۰'}),
-            'role': forms.Select(attrs={'class': 'form-select'}),
             'favorite_city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'مثلاً: مشهد، کیش، شیراز'}),
             'preferred_min_price': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'حداقل قیمت (تومان)'}),
             'preferred_max_price': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'حداکثر قیمت (تومان)'}),
@@ -43,6 +42,7 @@ class UserRegistrationForm(forms.ModelForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data['password'])
+        user.role = 'customer'  # ثبت‌نام از سایت منحصراً برای مسافر/مشتری است
         if commit:
             user.save()
         return user

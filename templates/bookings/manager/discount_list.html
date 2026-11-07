@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load jalali_tags %}
 
 {% block title %}مدیریت کدهای تخفیف | پنل مدیریت هتل{% endblock %}
 
@@ -60,8 +61,8 @@
                             </td>
                             <td class="small">{{ d.min_order_amount|floatformat:0 }} تومان</td>
                             <td class="small">
-                                <div>از: {{ d.valid_from }}</div>
-                                <div>تا: {{ d.valid_to }}</div>
+                                <div>از: {{ d.valid_from|to_jalali }}</div>
+                                <div>تا: {{ d.valid_to|to_jalali }}</div>
                             </td>
                             <td class="small">
                                 <b>{{ d.times_used }}</b> از {{ d.max_uses }}

@@ -13,6 +13,7 @@ from hotels.forms import HotelForm, RoomTypeForm
 from .models import Booking, DiscountCode, NotificationLog
 from .forms import BookingForm, DiscountCodeForm
 from .services import send_booking_confirmation
+from .jalali import parse_flexible_date, gregorian_to_jalali
 
 def is_manager(user):
     return user.is_authenticated and (user.is_hotel_manager or user.is_superuser)
@@ -27,9 +28,11 @@ def book_room_view(request, room_id):
     room = get_object_or_404(RoomType, id=room_id)
     hotel = room.hotel
 
-    # مقادیر اولیه از پارامترهای GET
-    initial_check_in = request.GET.get('check_in') or timezone.localdate().strftime('%Y-%m-%d')
-    initial_check_out = request.GET.get('check_out') or (timezone.localdate() + timedelta(days=1)).strftime('%Y-%m-%d')
+    # مقادیر اولیه از پارامترهای GET (شمسی)
+    today_jalali = gregorian_to_jalali(timezone.localdate())
+    tomorrow_jalali = gregorian_to_jalali(timezone.localdate() + timedelta(days=1))
+    initial_check_in = request.GET.get('check_in') or today_jalali
+    initial_check_out = request.GET.get('check_out') or tomorrow_jalali
     initial_rooms_count = request.GET.get('rooms_count', 1)
 
     initial_data = {
@@ -126,8 +129,8 @@ def apply_coupon_ajax_view(request):
             return JsonResponse({'valid': False, 'message': 'لطفاً کد تخفیف را وارد کنید.'})
 
         room = get_object_or_404(RoomType, id=room_id)
-        check_in = datetime.strptime(check_in_str, '%Y-%m-%d').date()
-        check_out = datetime.strptime(check_out_str, '%Y-%m-%d').date()
+        check_in = parse_flexible_date(check_in_str) or timezone.localdate()
+        check_out = parse_flexible_date(check_out_str) or (check_in + timedelta(days=1))
         nights = max(1, (check_out - check_in).days)
         total_price = room.price_per_night * nights * rooms_count
 

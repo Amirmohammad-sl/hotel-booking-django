@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load jalali_tags %}
 
 {% block title %}مشاهده رزروهای انجام شده | پنل مدیریت هتل{% endblock %}
 
@@ -81,8 +82,8 @@
                             <td>{{ b.guest_name }}</td>
                             <td class="small">{{ b.guest_phone }}</td>
                             <td class="small">
-                                <div>ورود: {{ b.check_in }}</div>
-                                <div>خروج: {{ b.check_out }}</div>
+                                <div>ورود: {{ b.check_in|to_jalali }}</div>
+                                <div>خروج: {{ b.check_out|to_jalali }}</div>
                             </td>
                             <td>{{ b.rooms_count }} اتاق ({{ b.nights_count }} شب)</td>
                             <td class="fw-bold text-success">{{ b.final_price|floatformat:0 }} تومان</td>

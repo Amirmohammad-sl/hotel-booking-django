@@ -1,6 +1,7 @@
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import NotificationLog
+from .jalali import gregorian_to_jalali
 
 def send_booking_confirmation(booking):
     """
@@ -10,6 +11,8 @@ def send_booking_confirmation(booking):
     guest_name = booking.guest_name
     guest_email = booking.user.email if booking.user.email else f"guest_{booking.user.username}@example.com"
     guest_phone = booking.guest_phone or booking.user.phone or "09120000000"
+    check_in_jalali = gregorian_to_jalali(booking.check_in)
+    check_out_jalali = gregorian_to_jalali(booking.check_out)
 
     # ۱. متن ایمیل تأیید رزرو
     email_subject = f"تأیید رزرو هتل {hotel.name} - کد رهگیری: {booking.tracking_code}"
@@ -24,8 +27,8 @@ def send_booking_confirmation(booking):
 هتل: {hotel.name} ({hotel.city})
 آدرس: {hotel.address}
 نوع اتاق: {booking.room_type.title} (تعداد: {booking.rooms_count} اتاق)
-تاریخ ورود: {booking.check_in} (ساعت ۱۴:۰۰)
-تاریخ خروج: {booking.check_out} (ساعت ۱۲:۰۰)
+تاریخ ورود: {check_in_jalali} (ساعت ۱۴:۰۰)
+تاریخ خروج: {check_out_jalali} (ساعت ۱۲:۰۰)
 تعداد شب‌ها: {booking.nights_count} شب
 مبلغ کل: {booking.total_price:,.0f} تومان
 تخفیف اعمال شده: {booking.discount_amount:,.0f} تومان
@@ -62,7 +65,7 @@ def send_booking_confirmation(booking):
     )
 
     # ۲. شبیه‌سازی ارسال پیامک تأیید رزرو
-    sms_text = f"مهمان گرامی {guest_name}، رزرو شما در هتل {hotel.name} با کد رهگیری {booking.tracking_code} برای تاریخ {booking.check_in} با موفقیت ثبت شد. تلفن هتل: {hotel.phone}"
+    sms_text = f"مهمان گرامی {guest_name}، رزرو شما در هتل {hotel.name} با کد رهگیری {booking.tracking_code} برای تاریخ {check_in_jalali} با موفقیت ثبت شد. تلفن هتل: {hotel.phone}"
     
     NotificationLog.objects.create(
         booking=booking,

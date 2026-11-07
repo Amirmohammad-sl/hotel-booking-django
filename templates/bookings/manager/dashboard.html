@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load jalali_tags %}
 
 {% block title %}داشبورد مدیریت هتل | آسایش هتل{% endblock %}
 
@@ -70,7 +71,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="fw-bold mb-0">
                         <i class="fa-solid fa-chart-pie text-primary ms-2"></i>
-                        وضعیت اشغال اتاق‌ها در تاریخ امروز ({{ today }})
+                        وضعیت اشغال اتاق‌ها در تاریخ امروز ({{ today|jalali_pretty }})
                     </h5>
                     <a href="{% url 'bookings:manager_room_status' %}" class="btn btn-sm btn-outline-primary">
                         مشاهده جزئیات کامل
@@ -187,7 +188,7 @@
                                 </td>
                                 <td>{{ b.guest_name }}</td>
                                 <td class="small">{{ b.guest_phone }}</td>
-                                <td class="small">{{ b.check_in }} تا {{ b.check_out }}</td>
+                                <td class="small">{{ b.check_in|to_jalali }} تا {{ b.check_out|to_jalali }}</td>
                                 <td class="fw-bold text-success">{{ b.final_price|floatformat:0 }} تومان</td>
                                 <td>
                                     {% if b.status == 'confirmed' %}

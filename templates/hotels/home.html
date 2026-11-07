@@ -1,55 +1,25 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}آسایش هتل | سامانه مدرن و سه‌بعدی رزرو آنلاین هتل{% endblock %}
+{% block title %}آسایش هتل | سامانه جستجو و رزرو آنلاین هتل{% endblock %}
 
 {% block content %}
-<!-- Hero Spatial Section -->
-<section class="hero-spatial-section">
-    <div class="container">
-        <!-- Hologram Badge -->
-        <div class="hero-hologram-badge">
-            <span class="pulse-dot-neon"></span>
-            <i class="fa-solid fa-atom text-info ms-1"></i>
-            سامانه هوشمند اقامتی با موتور سه‌بعدی WebGL
-        </div>
-
-        <!-- Majestic Gradient Title -->
-        <h1 class="gradient-title-3d">
-            اقامتی رؤیایی و متمایز در <br>
-            <span>مجلل‌ترین هتل‌های سراسر ایران</span>
-        </h1>
-
-        <!-- Subtitle -->
-        <p class="hero-subtitle">
-            تجربه رزرواسیون آنلاین با تقویم لحظه‌ای ظرفیت اتاق‌ها، مقایسه شفاف نرخ‌ها، محاسبه دقیق عدم تداخل رزرو و تخفیف‌های ویژه مسافران.
-        </p>
-
-        <!-- Quick Trust Badges -->
-        <div class="d-flex flex-wrap justify-content-center gap-3 mb-2">
-            <span class="badge bg-white bg-opacity-10 text-light border border-white border-opacity-10 px-3 py-2 rounded-pill small">
-                <i class="fa-solid fa-shield-halved text-success ms-1"></i> رزرو ۱۰۰٪ قطعی و فوری
-            </span>
-            <span class="badge bg-white bg-opacity-10 text-light border border-white border-opacity-10 px-3 py-2 rounded-pill small">
-                <i class="fa-solid fa-calendar-check text-info ms-1"></i> تقویم ظرفیت بدون تداخل
-            </span>
-            <span class="badge bg-white bg-opacity-10 text-light border border-white border-opacity-10 px-3 py-2 rounded-pill small">
-                <i class="fa-solid fa-tags text-warning ms-1"></i> بهترین نرخ تضمینی
-            </span>
-        </div>
+<!-- Hero Section -->
+<div class="hero-section text-center">
+    <div class="container py-3">
+        <h1 class="display-5 fw-extrabold mb-3">اقامتی خاطره‌انگیز و آسوده در سراسر ایران</h1>
+        <p class="lead mb-4 text-light opacity-90">جستجو، مقایسه و رزرو آنی هتل‌ها با بهترین قیمت و مشاهده لحظه‌ای ظرفیت اتاق‌ها</p>
     </div>
-</section>
+</div>
 
-<!-- Floating Dark Glass Search Console -->
+<!-- Search Bar Floating Card -->
 <div class="container">
-    <div class="glass-search-card">
+    <div class="hero-search-card">
         <form action="{% url 'hotels:hotel_list' %}" method="get">
             <div class="row g-3 align-items-end">
                 <div class="col-lg-3 col-md-6">
-                    <label class="form-label">
-                        <i class="fa-solid fa-location-dot text-danger ms-1"></i>شهر مقصد یا نام هتل
-                    </label>
-                    <input type="text" name="city" class="form-control" placeholder="مثلاً: کیش، مشهد، اصفهان، تهران..." list="citiesList">
+                    <label class="form-label small fw-bold text-muted"><i class="fa-solid fa-location-dot text-danger ms-1"></i>شهر مقصد یا نام هتل</label>
+                    <input type="text" name="city" class="form-control form-control-lg fs-6" placeholder="مثلاً: تهران، کیش، مشهد، اصفهان..." list="citiesList">
                     <datalist id="citiesList">
                         {% for c in cities %}
                             <option value="{{ c }}">
@@ -57,22 +27,16 @@
                     </datalist>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <label class="form-label">
-                        <i class="fa-solid fa-calendar-check text-primary ms-1"></i>تاریخ ورود
-                    </label>
-                    <input type="date" name="check_in" class="form-control" value="{{ today }}">
+                    <label class="form-label small fw-bold text-muted"><i class="fa-solid fa-calendar-check text-primary ms-1"></i>تاریخ ورود</label>
+                    <input type="text" name="check_in" class="form-control form-control-lg fs-6 jalali-datepicker" value="{{ today }}" placeholder="۱۴۰۳/۰۸/۱۵" dir="ltr" style="text-align: center;">
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <label class="form-label">
-                        <i class="fa-solid fa-calendar-xmark text-warning ms-1"></i>تاریخ خروج
-                    </label>
-                    <input type="date" name="check_out" class="form-control" value="{{ tomorrow }}">
+                    <label class="form-label small fw-bold text-muted"><i class="fa-solid fa-calendar-xmark text-warning ms-1"></i>تاریخ خروج</label>
+                    <input type="text" name="check_out" class="form-control form-control-lg fs-6 jalali-datepicker" value="{{ tomorrow }}" placeholder="۱۴۰۳/۰۸/۱۶" dir="ltr" style="text-align: center;">
                 </div>
                 <div class="col-lg-2 col-md-4">
-                    <label class="form-label">
-                        <i class="fa-solid fa-user-group text-info ms-1"></i>تعداد نفرات
-                    </label>
-                    <select name="capacity" class="form-select">
+                    <label class="form-label small fw-bold text-muted"><i class="fa-solid fa-user-group text-info ms-1"></i>تعداد نفرات</label>
+                    <select name="capacity" class="form-select form-select-lg fs-6">
                         <option value="1">۱ نفر</option>
                         <option value="2" selected>۲ نفر</option>
                         <option value="3">۳ نفر</option>
@@ -81,7 +45,7 @@
                     </select>
                 </div>
                 <div class="col-lg-1 col-md-2">
-                    <button type="submit" class="btn btn-primary w-100 py-2 fs-5" title="جستجو در هتل‌ها">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-2 fs-6 fw-bold">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                 </div>
@@ -90,19 +54,19 @@
     </div>
 </div>
 
-<!-- بخش پیشنهادات هوشمند هتل (Smart Recommendations) -->
-<div class="container my-5 pt-3">
+<!-- بخش پیشنهادات هوشمند (Bonus Feature) -->
+<div class="container mt-5 pt-3">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <span class="badge bg-primary-subtle text-primary px-3 py-1 rounded-pill mb-2 small fw-bold">
-                <i class="fa-solid fa-wand-magic-sparkles text-warning ms-1"></i> پیشنهاد هوشمند
-            </span>
-            <h3 class="fw-extrabold mb-1 text-white">گزینه‌های اقامتی منتخب</h3>
-            <p class="text-secondary small mb-0">
+            <h4 class="fw-bold mb-1">
+                <i class="fa-solid fa-wand-magic-sparkles text-warning ms-2"></i>
+                پیشنهاد هوشمند هتل
+            </h4>
+            <p class="text-muted small mb-0">
                 {% if user.is_authenticated and user.favorite_city %}
-                    پیشنهادهای اختصاصی بر اساس شهر محبوب شما ({{ user.favorite_city }}) و بودجه انتخابی
+                    پیشنهادهای اختصاصی برای شما بر اساس شهر مورد علاقه ({{ user.favorite_city }}) و بودجه دلخواهتان
                 {% else %}
-                    محبوب‌ترین و برترین هتل‌های برگزیده مسافران با بالاترین امتیاز
+                    بهترین و محبوب‌ترین گزینه‌های اقامتی منتخب مسافران
                 {% endif %}
             </p>
         </div>
@@ -133,13 +97,13 @@
                     </div>
                     <div class="p-3 d-flex flex-column flex-grow-1">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="fw-bold fs-6 mb-0 text-white">{{ hotel.name }}</h5>
+                            <h5 class="fw-bold fs-6 mb-0">{{ hotel.name }}</h5>
                             <span class="badge bg-secondary-subtle text-secondary">{{ hotel.city }}</span>
                         </div>
-                        <p class="text-secondary small text-truncate mb-3">{{ hotel.address }}</p>
-                        <div class="mt-auto pt-2 border-top border-white border-opacity-10 d-flex justify-content-between align-items-center">
+                        <p class="text-muted small text-truncate mb-3">{{ hotel.address }}</p>
+                        <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
                             <div>
-                                <small class="text-secondary d-block" style="font-size: 0.72rem;">شروع قیمت هر شب از:</small>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">شروع قیمت هر شب از:</small>
                                 <span class="price-tag fs-6">{{ hotel.min_price|floatformat:0 }} تومان</span>
                             </div>
                             <a href="{% url 'hotels:hotel_detail' hotel.id %}" class="btn btn-primary btn-sm px-3 rounded-pill">
@@ -150,22 +114,19 @@
                 </div>
             </div>
         {% empty %}
-            <div class="col-12 text-center py-4 text-secondary">
+            <div class="col-12 text-center py-4 text-muted">
                 هنوز هتلی در سامانه ثبت نشده است.
             </div>
         {% endfor %}
     </div>
 </div>
 
-<!-- بخش سایر هتل‌های برتر و منتخب -->
-<div class="container my-5 pt-3">
+<!-- بخش سایر هتل‌های برتر -->
+<div class="container mt-5 pt-3">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <span class="badge bg-warning bg-opacity-20 text-warning px-3 py-1 rounded-pill mb-2 small fw-bold">
-                <i class="fa-solid fa-crown ms-1"></i> هتل‌های مجلل ۵ ستاره
-            </span>
-            <h3 class="fw-extrabold mb-1 text-white">هتل‌های شاخص کشور</h3>
-            <p class="text-secondary small mb-0">بالاترین استانداردهای هتلداری بین‌المللی و بهترین امکانات رفاهی</p>
+            <h4 class="fw-bold mb-1"><i class="fa-solid fa-crown text-warning ms-2"></i>هتل‌های برتر و منتخب</h4>
+            <p class="text-muted small mb-0">بالاترین کیفیت اقامت و بهترین امکانات رفاهی</p>
         </div>
         <a href="{% url 'hotels:hotel_list' %}" class="btn btn-outline-primary btn-sm px-3 rounded-pill">
             مشاهده همه هتل‌ها <i class="fa-solid fa-arrow-left me-1"></i>
@@ -192,19 +153,19 @@
                     </div>
                     <div class="p-4 d-flex flex-column flex-grow-1">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="fw-bold mb-0 text-white">{{ hotel.name }}</h5>
+                            <h5 class="fw-bold mb-0">{{ hotel.name }}</h5>
                             <span class="badge bg-primary-subtle text-primary">{{ hotel.city }}</span>
                         </div>
-                        <div class="small text-secondary mb-2">
+                        <div class="small text-muted mb-2">
                             <i class="fa-solid fa-star text-warning ms-1"></i>
                             امتیاز مسافران: {{ hotel.average_rating }} از ۵ ({{ hotel.reviews_count }} نظر)
                         </div>
-                        <p class="text-secondary small mb-4" style="line-height: 1.6;">
+                        <p class="text-muted small mb-4" style="line-height: 1.6;">
                             {{ hotel.description|truncatewords:20 }}
                         </p>
-                        <div class="mt-auto pt-3 border-top border-white border-opacity-10 d-flex justify-content-between align-items-center">
+                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
                             <div>
-                                <small class="text-secondary d-block" style="font-size: 0.75rem;">هر شب از:</small>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">هر شب از:</small>
                                 <span class="price-tag fs-5">{{ hotel.min_price|floatformat:0 }} تومان</span>
                             </div>
                             <a href="{% url 'hotels:hotel_detail' hotel.id %}" class="btn btn-primary px-3 rounded-pill">
@@ -215,48 +176,6 @@
                 </div>
             </div>
         {% endfor %}
-    </div>
-</div>
-
-<!-- مزایای کلیدی با طراحی فضایی و مدرن -->
-<div class="container my-5 pt-4">
-    <div class="row g-4">
-        <div class="col-lg-3 col-md-6">
-            <div class="feature-3d-box p-4 text-center h-100">
-                <div class="feature-icon-wrapper mb-3 mx-auto">
-                    <i class="fa-solid fa-calendar-check text-info"></i>
-                </div>
-                <h6 class="fw-bold mb-2 text-white">تقویم بلادرنگ وضعیت اتاق</h6>
-                <p class="text-secondary small mb-0">مشاهده دقیق روزهای پر و خالی ۳۰ روز آینده در تقویم هر اتاق پیش از رزرو</p>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="feature-3d-box p-4 text-center h-100">
-                <div class="feature-icon-wrapper mb-3 mx-auto">
-                    <i class="fa-solid fa-atom text-primary"></i>
-                </div>
-                <h6 class="fw-bold mb-2 text-white">محیط فضایی سه‌بعدی WebGL</h6>
-                <p class="text-secondary small mb-0">لایه تعاملی ذرات کیهانی Three.js با واکنش به ماوس، اسکرول و فیزیک کارت‌ها</p>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="feature-3d-box p-4 text-center h-100">
-                <div class="feature-icon-wrapper mb-3 mx-auto">
-                    <i class="fa-solid fa-shield-halved text-success"></i>
-                </div>
-                <h6 class="fw-bold mb-2 text-white">فرمول عدم تداخل رزروها</h6>
-                <p class="text-secondary small mb-0">الگوریتم دقیق ریاضی در لایه دیتابیس جهت تضمین قطعی عدم بروز Overbooking</p>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="feature-3d-box p-4 text-center h-100">
-                <div class="feature-icon-wrapper mb-3 mx-auto">
-                    <i class="fa-solid fa-receipt text-warning"></i>
-                </div>
-                <h6 class="fw-bold mb-2 text-white">صدور واچر رسمی چاپی</h6>
-                <p class="text-secondary small mb-0">تولید کد رهگیری یکتا، استعلام آنی کدهای تخفیف با Ajax و ارسال پیامک تأیید</p>
-            </div>
-        </div>
     </div>
 </div>
 {% endblock %}

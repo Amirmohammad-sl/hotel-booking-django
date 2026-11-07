@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load jalali_tags %}
 
 {% block title %}پروفایل کاربری | آسایش هتل{% endblock %}
 
@@ -117,7 +118,7 @@
                                             <div class="fw-semibold">{{ b.room_type.hotel.name }}</div>
                                             <small class="text-muted">{{ b.room_type.title }}</small>
                                         </td>
-                                        <td class="small">{{ b.check_in }} تا {{ b.check_out }}</td>
+                                        <td class="small">{{ b.check_in|to_jalali }} تا {{ b.check_out|to_jalali }}</td>
                                         <td class="fw-bold">{{ b.final_price|floatformat:0 }} تومان</td>
                                         <td>
                                             {% if b.status == 'confirmed' %}

@@ -183,9 +183,26 @@
         const roomId = {{ room.id }};
         let currentDiscount = 0;
 
+        function parseDate(str) {
+            if (!str) return null;
+            const clean = window.JalaliUtils ? window.JalaliUtils.toEnglishDigits(str).trim() : str.trim();
+            const parts = clean.replace(/-/g, '/').split('/');
+            if (parts.length === 3) {
+                const y = parseInt(parts[0]);
+                const m = parseInt(parts[1]);
+                const d = parseInt(parts[2]);
+                if (y > 1300 && y < 1500 && window.JalaliUtils) {
+                    const [gy, gm, gd] = window.JalaliUtils.jalaliToGregorian(y, m, d);
+                    return new Date(gy, gm - 1, gd);
+                }
+                return new Date(y, m - 1, d);
+            }
+            return new Date(str);
+        }
+
         function updatePricing() {
-            const checkIn = new Date(checkInInput.value);
-            const checkOut = new Date(checkOutInput.value);
+            const checkIn = parseDate(checkInInput.value);
+            const checkOut = parseDate(checkOutInput.value);
             const rooms = parseInt(roomsCountInput.value) || 1;
 
             let nights = 1;

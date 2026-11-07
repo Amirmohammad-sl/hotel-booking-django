@@ -266,6 +266,13 @@ def run_seed():
     today = date.today()
     discounts_data = [
         {
+            'code': 'FIRST20',
+            'percent': 20,
+            'max_amount': Decimal('1500000'),
+            'min_order': Decimal('0'),
+            'hotel': None,
+        },
+        {
             'code': 'NOROOZ1403',
             'percent': 20,
             'max_amount': Decimal('1000000'),
@@ -368,6 +375,12 @@ def run_seed():
     )
 
     print("✓ رزرو نمونه فعال و لاگ‌های ایمیل و پیامک ایجاد شدند.")
+    print("✓ تکمیل هتل‌های تمامی شهرها (حداقل ۴ هتل در هر شهر)...")
+    try:
+        import subprocess
+        subprocess.run([sys.executable, 'populate_hotels.py'], check=True)
+    except Exception as e:
+        print("توجه در تکمیل هتل‌ها:", e)
     print("----------------------------------------------------------------")
     print("اطلاعات ورود برای بررسی سریع:")
     print("۱. حساب مدیر هتل: نام کاربری: manager | رمز عبور: 123")

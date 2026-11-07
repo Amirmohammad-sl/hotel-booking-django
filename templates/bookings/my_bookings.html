@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load jalali_tags %}
 
 {% block title %}سوابق رزروهای من | آسایش هتل{% endblock %}
 
@@ -47,8 +48,8 @@
                                     <small class="text-muted">{{ b.nights_count }} شب</small>
                                 </td>
                                 <td class="small">
-                                    <div>ورود: {{ b.check_in }}</div>
-                                    <div>خروج: {{ b.check_out }}</div>
+                                    <div>ورود: {{ b.check_in|to_jalali }}</div>
+                                    <div>خروج: {{ b.check_out|to_jalali }}</div>
                                 </td>
                                 <td>{{ b.rooms_count }}</td>
                                 <td class="fw-bold text-primary">{{ b.final_price|floatformat:0 }} تومان</td>

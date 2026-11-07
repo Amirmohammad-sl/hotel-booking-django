@@ -10,6 +10,7 @@ from django.utils import timezone
 from .models import Hotel, RoomType, Review, Amenity
 from .forms import ReviewForm
 from bookings.models import Booking
+from bookings.jalali import parse_flexible_date, gregorian_to_jalali
 
 def home_view(request):
     cities = Hotel.objects.values_list('city', flat=True).distinct()
@@ -50,8 +51,8 @@ def home_view(request):
         # در صورت نبود ترجیحات کاربر، پیشنهاد بر اساس برترین هتل‌های دارای بالاترین امتیاز
         recommendations = list(Hotel.objects.annotate(avg_rate=Avg('reviews__rating')).order_by('-avg_rate', '-stars')[:4])
 
-    today = timezone.localdate().strftime('%Y-%m-%d')
-    tomorrow = (timezone.localdate() + timedelta(days=1)).strftime('%Y-%m-%d')
+    today = gregorian_to_jalali(timezone.localdate())
+    tomorrow = gregorian_to_jalali(timezone.localdate() + timedelta(days=1))
 
     context = {
         'cities': cities,
@@ -85,15 +86,13 @@ def hotel_list_view(request):
     check_in = None
     check_out = None
     if check_in_str and check_out_str:
-        try:
-            check_in = datetime.strptime(check_in_str, '%Y-%m-%d').date()
-            check_out = datetime.strptime(check_out_str, '%Y-%m-%d').date()
+        check_in = parse_flexible_date(check_in_str)
+        check_out = parse_flexible_date(check_out_str)
+        if check_in and check_out:
             if check_out <= check_in:
                 messages.warning(request, "تاریخ خروج باید بعد از تاریخ ورود باشد.")
                 check_in = None
                 check_out = None
-        except ValueError:
-            pass
 
     capacity = int(capacity_str) if capacity_str and capacity_str.isdigit() else 1
 
@@ -151,11 +150,8 @@ def hotel_detail_view(request, hotel_id):
     check_in = None
     check_out = None
     if check_in_str and check_out_str:
-        try:
-            check_in = datetime.strptime(check_in_str, '%Y-%m-%d').date()
-            check_out = datetime.strptime(check_out_str, '%Y-%m-%d').date()
-        except ValueError:
-            pass
+        check_in = parse_flexible_date(check_in_str)
+        check_out = parse_flexible_date(check_out_str)
 
     rooms_data = []
     for room in hotel.rooms.all():
